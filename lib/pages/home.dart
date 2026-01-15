@@ -1,11 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:songs_app/l10n/app_localizations.dart';
 import 'package:songs_app/models/category.dart';
+import 'package:songs_app/pages/song_detail_page.dart';
+import '../db/song_database.dart';
+import '../models/song.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.setLocale});
+  const HomePage({
+    super.key,
+    //  required this.setLocale
+  });
 
-  final Function setLocale;
+  // final Function setLocale;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -15,6 +23,8 @@ class _HomePageState extends State<HomePage> {
   _HomePageState();
 
   List<CategoryModel> categories = [];
+  List<Song> _searchResults = [];
+  bool _isLoading = false;
 
   final controller = TextEditingController();
 
@@ -28,6 +38,68 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     controller.addListener(_onTextChange);
     super.initState();
+    _initDatabase();
+  }
+
+  Future<void> _initDatabase() async {
+    await SongDatabase.instance.insertInitialData();
+  }
+
+  void _onSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    final results = await SongDatabase.instance.search(query);
+    setState(() {
+      _searchResults = results;
+      _isLoading = false;
+    });
+  }
+
+  Widget _searchSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: _onSearch,
+            decoration: InputDecoration(
+              hintText: 'Search songs...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          if (_isLoading) LinearProgressIndicator(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                final song = _searchResults[index];
+                return ListTile(
+                  title: Text(song.title),
+                  subtitle: Text(
+                    '${song.verses[0].substring(0, min(60, song.verses[0].length))}...',
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SongDetailPage(song: song),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   AppBar _appbar(BuildContext context) {
@@ -115,9 +187,9 @@ class _HomePageState extends State<HomePage> {
           onTap: () {
             final currentLocale = Localizations.localeOf(context).languageCode;
             if (currentLocale == 'en') {
-              widget.setLocale(Locale('ru'));
+              // widget.setLocale(Locale('ru'));
             } else {
-              widget.setLocale(Locale('en'));
+              // widget.setLocale(Locale('en'));
             }
           },
           child: SizedBox(
@@ -150,16 +222,17 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: _appbar(context),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textCtrl(context),
-          // searchField(context),
-          // categoryColumn(context),
+      body: _searchSection(context),
+      // Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     textCtrl(context),
+      //     // searchField(context),
+      //     // categoryColumn(context),
 
-          // changeLanguage(context),
-        ],
-      ),
+      //     // changeLanguage(context),
+      //   ],
+      // ),
     );
   }
 
@@ -177,10 +250,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchField extends StatelessWidget {
-  const SearchField({
-    super.key,
-    required this.context,
-  });
+  const SearchField({super.key, required this.context});
 
   final BuildContext context;
 
