@@ -7,5 +7,7 @@
     "search": "Search",
     "@search": {
         "description": "Search"
-    }
+    },
+    "home": "Home",
+    "@home": {}
 }

@@ -1,5 +1,6 @@
 {
     "@@locale": "ru",
     "helloWorld": "Привет, мир!",
-    "search": "Поиск"
+    "search": "Поиск",
+    "home": "Главная"
 }
