@@ -262,6 +262,15 @@ Future<void> insertInitialData() async {
     };
 
     final id = await db.insert('collections', data);
+    
+    // Add associated songs to the collection_songs table
+    for (final songId in collection.songIds) {
+      await db.insert('collection_songs', {
+        'collection_id': id,
+        'song_id': songId,
+      });
+    }
+    
     return Collection(
       id: id,
       name: collection.name,
