@@ -6,6 +6,7 @@ import 'package:songs_app/models/category.dart';
 import 'package:songs_app/pages/song_detail_page.dart';
 import '../db/song_database.dart';
 import '../models/song.dart';
+import 'collections_page.dart'; // Import the collections page
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -85,6 +86,29 @@ class _HomePageState extends State<HomePage> {
                   subtitle: Text(
                     '${song.verses[0].substring(0, min(60, song.verses[0].length))}...',
                   ),
+                  trailing: song.tags.isNotEmpty || song.themes.isNotEmpty
+                      ? Wrap(
+                          spacing: 4,
+                          children: [
+                            if (song.tags.isNotEmpty)
+                              Chip(
+                                label: Text(
+                                  song.tags.take(2).join(', '),
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                backgroundColor: Colors.blue.withOpacity(0.2),
+                              ),
+                            if (song.themes.isNotEmpty)
+                              Chip(
+                                label: Text(
+                                  song.themes.take(2).join(', '),
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                backgroundColor: Colors.green.withOpacity(0.2),
+                              ),
+                          ],
+                        )
+                      : null,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -110,24 +134,68 @@ class _HomePageState extends State<HomePage> {
       leading: Container(
         margin: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Color(0xfff7f8f8),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+        child: Icon(Icons.menu, color: Theme.of(context).iconTheme.color),
       ),
       actions: [
         Container(
           margin: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Color(0xfff7f8f8),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: GestureDetector(
-            onTap: () {},
-            child: Icon(
-              Icons.keyboard_control,
+          child: PopupMenuButton(
+            icon: Icon(
+              Icons.more_vert,
               color: Theme.of(context).iconTheme.color,
             ),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'collections',
+                child: Row(
+                  children: [
+                    Icon(Icons.collections),
+                    SizedBox(width: 8),
+                    Text('Collections'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'statistics',
+                child: Row(
+                  children: [
+                    Icon(Icons.calculate), // Changed to a calculation icon for stats
+                    SizedBox(width: 8),
+                    Text('Statistics'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings),
+                    SizedBox(width: 8),
+                    Text('Settings'),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'collections') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CollectionsPage()),
+                );
+              } else if (value == 'statistics') {
+                // We'll implement statistics page later in Phase 2
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Statistics page coming soon')),
+                );
+              } else if (value == 'settings') {
+                Navigator.pushNamed(context, '/settings');
+              }
+            },
           ),
         ),
       ],
@@ -164,12 +232,24 @@ class _HomePageState extends State<HomePage> {
               return Container(
                 width: 100,
                 decoration: BoxDecoration(
-                  color: categories[index].boxColor,
+                  color: Color(int.parse('0xFF${categories[index].colorHex.substring(1)}')),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(categories[index].name),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      categories[index].icon,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      categories[index].name,
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               );
             },
@@ -223,16 +303,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: _appbar(context),
       body: _searchSection(context),
-      // Column(
-      //   crossAxisAlignment: CrossAxisAlignment.start,
-      //   children: [
-      //     textCtrl(context),
-      //     // searchField(context),
-      //     // categoryColumn(context),
-
-      //     // changeLanguage(context),
-      //   ],
-      // ),
+      // Adding a bottom navigation bar to access different sections
     );
   }
 

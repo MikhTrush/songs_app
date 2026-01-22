@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
   static const _keyThemeMode = 'theme_mode';
   static const _keyFontSize = 'font_size';
   static const _keyDefaultMeetingType = 'default_meeting_type';
+  static const _keyDefaultLocale = 'default_locale';
 
   // Тема: 'light' | 'dark' | 'system'
   Future<String> getThemeMode() async {
@@ -36,5 +38,22 @@ class SettingsService {
   Future<void> setDefaultMeetingType(String type) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDefaultMeetingType, type);
+  }
+
+  Future<void> setDefaultLocale(String locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyDefaultLocale, locale);
+  }
+
+  Future<Locale> getLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? localeString = prefs.getString(_keyDefaultLocale);
+    if (localeString != null && localeString.isNotEmpty) {
+      return Locale.fromSubtags(languageCode: localeString);
+    } else {
+      return const Locale(
+        'ru',
+      ); // Возвращаем русскую локаль по умолчанию, если не установлена
+    }
   }
 }

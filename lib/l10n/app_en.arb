@@ -9,5 +9,7 @@
         "description": "Search"
     },
     "home": "Home",
-    "@home": {}
+    "@home": {},
+    "songs_app": "Songs App",
+    "@songs_app": {}
 }

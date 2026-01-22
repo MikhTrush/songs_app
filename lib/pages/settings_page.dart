@@ -1,113 +1,77 @@
+// settings_page.dart
 import 'package:flutter/material.dart';
-import '../services/settings_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart'; // ← ваш новый SettingsProvider
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  late Future<String> _futureThemeMode;
-  late Future<double> _futureFontSize;
-  late Future<String> _futureMeetingType;
-
-  final SettingsService _settings = SettingsService();
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshData();
-  }
-
-  void _refreshData() {
-    _futureThemeMode = _settings.getThemeMode();
-    _futureFontSize = _settings.getFontSize();
-    _futureMeetingType = _settings.getDefaultMeetingType();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Реактивно читаем все настройки
+    final provider = context.watch<SettingsProvider>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Настройки')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Тема
-          FutureBuilder<String>(
-            future: _futureThemeMode,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              final mode = snapshot.data!;
-              return ListTile(
-                title: const Text('Тема'),
-                subtitle: Text(mode == 'system' ? 'Как в системе' : mode == 'light' ? 'Светлая' : 'Тёмная'),
-                trailing: DropdownButton<String>(
-                  value: mode,
-                  items: const [
-                    DropdownMenuItem(value: 'system', child: Text('Как в системе')),
-                    DropdownMenuItem(value: 'light', child: Text('Светлая')),
-                    DropdownMenuItem(value: 'dark', child: Text('Тёмная')),
-                  ],
-                  onChanged: (value) async {
-                    if (value != null) {
-                      await _settings.setThemeMode(value);
-                      setState(() => _futureThemeMode = _settings.getThemeMode());
-                      // TODO: обновить тему всего приложения
-                    }
-                  },
-                ),
-              );
-            },
+          ListTile(
+            title: const Text('Тема'),
+            subtitle: Text(
+              provider.themeMode == 'system'
+                  ? 'Как в системе'
+                  : provider.themeMode == 'light'
+                      ? 'Светлая'
+                      : 'Тёмная',
+            ),
+            trailing: DropdownButton<String>(
+              value: provider.themeMode,
+              items: const [
+                DropdownMenuItem(value: 'system', child: Text('Как в системе')),
+                DropdownMenuItem(value: 'light', child: Text('Светлая')),
+                DropdownMenuItem(value: 'dark', child: Text('Тёмная')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<SettingsProvider>().setThemeMode(value);
+                }
+              },
+            ),
           ),
 
           // Размер шрифта
-          FutureBuilder<double>(
-            future: _futureFontSize,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              final size = snapshot.data!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Размер шрифта', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Slider(
-                    value: size,
-                    min: 14,
-                    max: 28,
-                    divisions: 14,
-                    label: size.toInt().toString(),
-                    onChanged: (value) async {
-                      await _settings.setFontSize(value);
-                      setState(() => _futureFontSize = _settings.getFontSize());
-                    },
-                  ),
-                ],
-              );
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Размер шрифта', style: TextStyle(fontWeight: FontWeight.bold)),
+              Slider(
+                value: provider.fontSize,
+                min: 14,
+                max: 28,
+                divisions: 14,
+                label: provider.fontSize.toInt().toString(),
+                onChanged: (value) {
+                  context.read<SettingsProvider>().setFontSize(value);
+                },
+              ),
+            ],
           ),
 
           // Тип собрания
-          FutureBuilder<String>(
-            future: _futureMeetingType,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              return ListTile(
-                title: const Text('Тип собрания по умолчанию'),
-                subtitle: Text(snapshot.data!),
-                onTap: () => _showMeetingTypeDialog(context),
-              );
-            },
+          ListTile(
+            title: const Text('Тип собрания по умолчанию'),
+            subtitle: Text(provider.defaultMeetingType),
+            onTap: () => _showMeetingTypeDialog(context, provider),
           ),
         ],
       ),
     );
   }
 
-  void _showMeetingTypeDialog(BuildContext context) async {
-    final current = await _settings.getDefaultMeetingType();
-    final controller = TextEditingController(text: current);
+  void _showMeetingTypeDialog(BuildContext context, SettingsProvider provider) {
+    final controller = TextEditingController(text: provider.defaultMeetingType);
 
     showDialog(
       context: context,
@@ -123,10 +87,12 @@ class _SettingsPageState extends State<SettingsPage> {
             child: const Text('Отмена'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              await _settings.setDefaultMeetingType(controller.text);
+            onPressed: () {
+              final newType = controller.text.trim();
+              if (newType.isNotEmpty) {
+                context.read<SettingsProvider>().setDefaultMeetingType(newType);
+              }
               Navigator.pop(context);
-              setState(() => _futureMeetingType = _settings.getDefaultMeetingType());
             },
             child: const Text('Сохранить'),
           ),

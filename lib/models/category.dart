@@ -2,61 +2,64 @@ import 'package:flutter/material.dart';
 
 class CategoryModel {
   String name;
-  String iconPath;
-  Color boxColor;
+  IconData icon;
+  String colorHex; // Using hex color string for more flexibility
 
   CategoryModel({
     required this.name,
-    required this.iconPath,
-    required this.boxColor,
+    required this.icon,
+    required this.colorHex,
   });
 
+  // Return a sample list of meaningful categories/tags
   static List<CategoryModel> getCategories() {
     List<CategoryModel> categories = [];
 
     categories.add(
       CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.pink,
+        name: 'Hymns',
+        icon: Icons.music_note,
+        colorHex: '#FF6B6B',
       ),
     );
 
     categories.add(
       CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.pink,
-      ),
-    );
-    categories.add(
-      CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.pink,
-      ),
-    );
-    categories.add(
-      CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.pink,
+        name: 'Praise',
+        icon: Icons.star,
+        colorHex: '#4ECDC4',
       ),
     );
 
     categories.add(
       CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.purple,
+        name: 'Worship',
+        icon: Icons.favorite,
+        colorHex: '#45B7D1',
       ),
     );
 
     categories.add(
       CategoryModel(
-        name: 'Salad',
-        iconPath: 'assets/icons/plate.svg',
-        boxColor: Colors.amber,
+        name: 'Gospel',
+        icon: Icons.library_music,
+        colorHex: '#96CEB4',
+      ),
+    );
+
+    categories.add(
+      CategoryModel(
+        name: 'Christmas',
+        icon: Icons.ac_unit,
+        colorHex: '#FFEAA7',
+      ),
+    );
+
+    categories.add(
+      CategoryModel(
+        name: 'Easter',
+        icon: Icons.local_florist,
+        colorHex: '#DDA0DD',
       ),
     );
 

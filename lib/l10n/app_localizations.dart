@@ -115,6 +115,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
+
+  /// No description provided for @songs_app.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs App'**
+  String get songs_app;
 }
 
 class _AppLocalizationsDelegate

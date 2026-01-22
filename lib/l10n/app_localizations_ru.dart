@@ -16,4 +16,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get home => 'Главная';
+
+  @override
+  String get songs_app => 'Приложение для песен';
 }

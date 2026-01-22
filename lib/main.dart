@@ -1,131 +1,112 @@
+// main.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:songs_app/l10n/app_localizations.dart';
-import 'package:songs_app/services/settings_service.dart';
+import 'package:songs_app/pages/main_navigation.dart';
+import 'package:songs_app/providers/settings_provider.dart'; // ← ваш новый провайдер
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:flutter/widgets.dart'; // для PlatformDispatcher
-// import 'pages/user_form.dart';
-import 'pages/home.dart';
-// import 'l10n';
+import 'package:songs_app/services/settings_service.dart'; // оставляем для совместимости
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Для десктопа:
   if (isDesktop()) {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(MyApp());
+  // Создаём и загружаем провайдер ДО runApp
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.load();
+
+  runApp(
+    ChangeNotifierProvider<SettingsProvider>.value(
+      value: settingsProvider,
+      child: const MyApp(),
+    ),
+  );
 }
 
 bool isDesktop() {
   return !(Platform.isAndroid || Platform.isIOS);
 }
 
-class MyApp2 extends StatefulWidget {
-  const MyApp2({super.key});
-
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp2> {
-  late Future<String> _futureThemeMode;
-  final SettingsService _settings = SettingsService();
-
-  @override
-  void initState() {
-    super.initState();
-    _futureThemeMode = _settings.getThemeMode();
-  }
-
-  // Brightness _getBrightness(String mode) {
-  //   if (mode == 'dark') return Brightness.dark;
-  //   if (mode == 'light') return Brightness.light;
-  //   // system: определяем по текущей теме устройства
-  //   return View.of(context).brightness;
-  // }
-
-  Locale _locale = const Locale('en');
-
-  void setLocale(Locale locale) {
-    setState(() => _locale = locale);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: _locale,
-      theme: ThemeData(
-        // brightness: _getBrightness(await _futureThemeMode), // ← динамическая яркость
-        fontFamily: 'Poppins',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-      ),
-      // theme: ThemeData(
-      //   fontFamily: 'Poppins',
-      //   colorScheme: ColorScheme.fromSeed(
-      //     seedColor: Colors.teal,
-      //     brightness: Brightness.light,
-      //   ),
-      //   textTheme: TextTheme(
-      //     titleLarge: TextStyle(
-      //       color: Theme.of(context).primaryColorDark,
-      //       fontSize: 18,
-      //       fontWeight: FontWeight.bold,
-      //     ),
-      //   ),
-      // ),
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: HomePage(),
-    );
-  }
-}
-
-// Замени класс MyApp на StatelessWidget (упрощает управление состоянием)
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Locale setLocale = Locale('en');
-    return FutureBuilder<String>(
-      future: SettingsService().getThemeMode(),
-      builder: (context, snapshot) {
-        final themeMode = snapshot.data ?? 'system';
-        final brightness = _resolveBrightness(themeMode, context);
+    return Consumer<SettingsProvider>(
+      builder: (context, provider, child) {
+        final themeMode = provider.themeMode;
+        final locale = provider.locale;
+        final baseFontSize = provider.fontSize; // например, 16
+
+        // Определяем размеры на основе базового fontsize
+        final double bodySize = baseFontSize;
+        final double titleLargeSize = baseFontSize + 2; // чуть крупнее
+        final double displayLargeSize =
+            baseFontSize + 6; // или baseFontSize * 4.5 — как удобнее
 
         return MaterialApp(
-          locale: const Locale(
-            'en',
-          ), // временно фиксируем; позже вынесешь в состояние
+          locale: locale,
           theme: ThemeData(
-            brightness: brightness,
             fontFamily: 'Poppins',
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal).copyWith(brightness: brightness),
-            textTheme: const TextTheme(
-              titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+            textTheme: TextTheme(
+              displayLarge: TextStyle(
+                fontSize: displayLargeSize,
+                fontWeight: FontWeight.bold,
+              ),
+              titleLarge: TextStyle(
+                fontSize: titleLargeSize,
+                fontWeight: FontWeight.bold,
+              ),
+              bodyMedium: TextStyle(
+                fontSize: bodySize,
+                fontFamily: 'Merryweather',
+              ),
             ),
           ),
-          debugShowCheckedModeBanner: false,
+          darkTheme: ThemeData(
+            fontFamily: 'Poppins',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.teal,
+              brightness: Brightness.dark,
+            ),
+            textTheme: TextTheme(
+              displayLarge: TextStyle(
+                fontSize: displayLargeSize,
+                fontWeight: FontWeight.bold,
+              ),
+              titleLarge: TextStyle(
+                fontSize: titleLargeSize,
+                fontWeight: FontWeight.bold,
+              ),
+              bodyMedium: TextStyle(
+                fontSize: bodySize,
+                fontFamily: 'Merryweather',
+              ),
+            ),
+          ),
+          themeMode: _resolveThemeMode(themeMode),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: HomePage(), // твой основной экран с BottomNav
+          home: MainNavigation(),
         );
       },
     );
   }
 
-  Brightness _resolveBrightness(String mode, BuildContext context) {
-    if (mode == 'light') return Brightness.light;
-    if (mode == 'dark') return Brightness.dark;
-
-    // Для 'system': определяем через PlatformDispatcher
-    final platformBrightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    return platformBrightness;
+  ThemeMode _resolveThemeMode(String mode) {
+    switch (mode) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
+    }
   }
 }
