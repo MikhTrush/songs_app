@@ -59,7 +59,128 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _searchResults = results;
       _isLoading = false;
+      _currentQuery = query.toLowerCase(); // Store the current search query
     });
+  }
+
+  // Add this new variable to store the current search term
+  String _currentQuery = '';
+
+  // Add this helper method to highlight matches
+  Widget _buildHighlightedText(String fullText, String searchTerm, {bool isTitle = false}) {
+    if (searchTerm.isEmpty) {
+      return Text(
+        fullText,
+        style: isTitle ? Theme.of(context).textTheme.titleLarge : null,
+      );
+    }
+
+    final lowerFullText = fullText.toLowerCase();
+    final lowerSearchTerm = searchTerm.toLowerCase();
+    
+    // Use case-insensitive search to find all matches
+    final matches = <(int start, int end)>[]; // Store match positions
+    int searchStart = 0;
+    
+    while (searchStart <= lowerFullText.length - lowerSearchTerm.length) {
+      final matchIndex = lowerFullText.indexOf(lowerSearchTerm, searchStart);
+      if (matchIndex == -1) break;
+      
+      matches.add((matchIndex, matchIndex + lowerSearchTerm.length));
+      searchStart = matchIndex + 1; // Move by 1 to catch overlapping matches
+    }
+
+    if (matches.isEmpty) {
+      return Text(
+        fullText,
+        style: isTitle ? Theme.of(context).textTheme.titleLarge : null,
+      );
+    }
+
+    // Build text spans based on match positions
+    final List<TextSpan> spans = [];
+    int currentPosition = 0;
+
+    for (final (start, end) in matches) {
+      // Add text before match
+      if (currentPosition < start) {
+        spans.add(TextSpan(text: fullText.substring(currentPosition, start)));
+      }
+      
+      // Add highlighted match
+      spans.add(
+        TextSpan(
+          text: fullText.substring(start, end),
+          style: TextStyle(
+            backgroundColor: Colors.yellow.withOpacity(0.7),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      
+      currentPosition = end;
+    }
+
+    // Add remaining text after last match
+    if (currentPosition < fullText.length) {
+      spans.add(TextSpan(text: fullText.substring(currentPosition)));
+    }
+
+    return RichText(
+      text: TextSpan(
+        style: isTitle ? Theme.of(context).textTheme.titleLarge : DefaultTextStyle.of(context).style,
+        children: spans,
+      ),
+    );
+  }
+
+  // Helper function to find the first verse containing the search term
+  String _findVerseWithMatch(Song song, String searchTerm) {
+    if (searchTerm.isEmpty) return song.verses.isNotEmpty ? song.verses[0] : '';
+    
+    final lowerSearchTerm = searchTerm.toLowerCase();
+    
+    for (String verse in song.verses) {
+      if (verse.toLowerCase().contains(lowerSearchTerm)) {
+        return _trimVerseToLines(verse, 3);
+      }
+    }
+    
+    // Fallback to first verse if no match found
+    return song.verses.isNotEmpty ? _trimVerseToLines(song.verses[0], 3) : '';
+  }
+
+  // Helper function to trim a verse to a specific number of lines
+  String _trimVerseToLines(String verse, int maxLines) {
+    if (maxLines <= 0) return '';
+    
+    // Split the verse into lines
+    List<String> lines = verse.split('\n');
+    
+    // If we have fewer lines than the max, return as is
+    if (lines.length <= maxLines) {
+      return verse;
+    }
+    
+    // Calculate which lines to show based on the middle of the content
+    int startIndex = (lines.length - maxLines) ~/ 2;
+    int endIndex = startIndex + maxLines;
+    
+    // Create the trimmed result with ellipses if needed
+    List<String> selectedLines = lines.sublist(startIndex, endIndex);
+    String result = selectedLines.join('\n');
+    
+    // Add ellipses at the beginning if we skipped lines at the start
+    if (startIndex > 0) {
+      result = '...\n$result';
+    }
+    
+    // Add ellipses at the end if we skipped lines at the end
+    if (endIndex < lines.length) {
+      result = '$result\n...';
+    }
+    
+    return result;
   }
 
   Widget _searchSection(BuildContext context) {
@@ -81,14 +202,20 @@ class _SearchPageState extends State<SearchPage> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final song = _searchResults[index];
+                
+                // Check if the title contains the search term
+                final titleContainsMatch = _currentQuery.isEmpty || 
+                    song.title.toLowerCase().contains(_currentQuery.toLowerCase());
+                
+                // Get the verse to display based on whether title contains match
+                final verseToDisplay = _findVerseWithMatch(song, _currentQuery);
+
                 return ListTile(
-                  title: Text(song.title),
+                  title: _buildHighlightedText(song.title, _currentQuery, isTitle: true),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${song.verses[0].substring(0, min(60, song.verses[0].length))}...',
-                      ),
+                      _buildHighlightedText(verseToDisplay, _currentQuery),
                       if (song.categories.isNotEmpty)
                         Wrap(
                           spacing: 4,

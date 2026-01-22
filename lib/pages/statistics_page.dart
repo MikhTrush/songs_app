@@ -382,7 +382,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             .map((entry) {
               int index = entry.key;
               var item = entry.value;
-              double radius = 100.0;
+              double radius = 70.0; // Reduced radius to fit better in card
               double value = item.value.toDouble();
 
               return PieChartSectionData(
@@ -390,8 +390,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 value: value,
                 title: "${item.key}: ${item.value}",
                 radius: radius,
-                titleStyle: const TextStyle(
-                  fontSize: 12,
+                titleStyle: TextStyle(
+                  fontSize: 10, // Smaller font size
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -415,11 +415,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
         return Card(
           child: SizedBox(
-            height: 200,
+            height: 250, // Increased height to accommodate chart
             child: PieChart(
               PieChartData(
                 sections: sections,
-                centerSpaceRadius: 40,
+                centerSpaceRadius: 30, // Reduced center space
                 sectionsSpace: 2,
                 pieTouchData: PieTouchData(
                   enabled: true,
