@@ -6,6 +6,7 @@ class SettingsService {
   static const _keyFontSize = 'font_size';
   static const _keyDefaultMeetingType = 'default_meeting_type';
   static const _keyDefaultLocale = 'default_locale';
+  static const _keyMeetingTypes = 'meeting_types';
 
   // Тема: 'light' | 'dark' | 'system'
   Future<String> getThemeMode() async {
@@ -38,6 +39,38 @@ class SettingsService {
   Future<void> setDefaultMeetingType(String type) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDefaultMeetingType, type);
+  }
+
+  // Список типов собраний
+  Future<List<String>> getMeetingTypes() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? types = prefs.getStringList(_keyMeetingTypes);
+    
+    if (types == null || types.isEmpty) {
+      // Return default meeting types if none are stored
+      return ['Воскресное собрание', 'Вечернее собрание'];
+    }
+    
+    return types;
+  }
+
+  Future<void> setMeetingTypes(List<String> types) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyMeetingTypes, types);
+  }
+
+  Future<void> addMeetingType(String type) async {
+    List<String> types = await getMeetingTypes();
+    if (!types.contains(type)) {
+      types.add(type);
+      await setMeetingTypes(types);
+    }
+  }
+
+  Future<void> removeMeetingType(String type) async {
+    List<String> types = await getMeetingTypes();
+    types.remove(type);
+    await setMeetingTypes(types);
   }
 
   Future<void> setDefaultLocale(String locale) async {

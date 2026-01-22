@@ -8,8 +8,8 @@ import '../db/song_database.dart';
 import '../models/song.dart';
 import 'collections_page.dart'; // Import the collections page
 
-class HomePage extends StatefulWidget {
-  const HomePage({
+class SearchPage extends StatefulWidget {
+  const SearchPage({
     super.key,
     //  required this.setLocale
   });
@@ -17,11 +17,11 @@ class HomePage extends StatefulWidget {
   // final Function setLocale;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  _HomePageState();
+class _SearchPageState extends State<SearchPage> {
+  _SearchPageState();
 
   List<CategoryModel> categories = [];
   List<Song> _searchResults = [];

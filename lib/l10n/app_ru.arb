@@ -60,5 +60,14 @@
     "font_size_option": "Размер шрифта",
     "meeting_type_option": "Тип встречи по умолчанию",
     "language_option": "Язык",
-    "color": "Цвет"
+    "color": "Цвет",
+    "record_song_usage": "Записать использование песни",
+    "date_label": "Дата",
+    "meeting_type_label": "Тип встречи",
+    "record": "Записать",
+    "manage_meeting_types": "Управление типами встреч",
+    "add_meeting_type": "Добавить тип встречи",
+    "enter_meeting_type_hint": "Введите тип встречи",
+    "save": "Сохранить",
+    "add": "Добавить"
 }

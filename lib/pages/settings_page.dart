@@ -20,19 +20,12 @@ class SettingsPage extends StatelessWidget {
           // Тема
           ListTile(
             title: Text(AppLocalizations.of(context)!.theme_option),
-            subtitle: Text(
-              provider.themeMode == 'system'
-                  ? AppLocalizations.of(context)!.system_theme
-                  : provider.themeMode == 'light'
-                  ? AppLocalizations.of(context)!.light_theme
-                  : AppLocalizations.of(context)!.dark_theme,
-            ),
             trailing: DropdownButton<String>(
               value: provider.themeMode,
-              items: const [
-                DropdownMenuItem(value: 'system', child: Text('Как в системе')),
-                DropdownMenuItem(value: 'light', child: Text('Светлая')),
-                DropdownMenuItem(value: 'dark', child: Text('Тёмная')),
+              items:  [
+                DropdownMenuItem(value: 'system', child: Text(AppLocalizations.of(context)!.system_theme)),
+                DropdownMenuItem(value: 'light', child: Text(AppLocalizations.of(context)!.light_theme)),
+                DropdownMenuItem(value: 'dark', child: Text(AppLocalizations.of(context)!.dark_theme)),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -82,34 +75,64 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
 
-          // Тип собрания
+          // Тип собрания по умолчанию
           ListTile(
             title: Text(AppLocalizations.of(context)!.meeting_type_option),
             subtitle: Text(provider.defaultMeetingType),
-            onTap: () => _showMeetingTypeDialog(context, provider),
+            onTap: () => _showDefaultMeetingTypeDialog(context, provider),
+          ),
+
+
+          // Управление списком типов собраний
+          ListTile(
+            title: Text(AppLocalizations.of(context)!.manage_meeting_types),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...provider.meetingTypes.map((type) => 
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(child: Text(type)),
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 18.0),
+                          onPressed: () => provider.removeMeetingType(type),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _showAddMeetingTypeDialog(context, provider),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showMeetingTypeDialog(BuildContext context, SettingsProvider provider) {
+  void _showDefaultMeetingTypeDialog(BuildContext context, SettingsProvider provider) {
     final controller = TextEditingController(text: provider.defaultMeetingType);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Тип собрания'),
+        title: Text(AppLocalizations.of(context)!.default_meeting_type),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Например: Вечернее собрание',
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.enter_meeting_type_hint,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -119,7 +142,40 @@ class SettingsPage extends StatelessWidget {
               }
               Navigator.pop(context);
             },
-            child: const Text('Сохранить'),
+            child: Text(AppLocalizations.of(context)!.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddMeetingTypeDialog(BuildContext context, SettingsProvider provider) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.add_meeting_type),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.enter_meeting_type_hint,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newType = controller.text.trim();
+              if (newType.isNotEmpty && !provider.meetingTypes.contains(newType)) {
+                context.read<SettingsProvider>().addMeetingType(newType);
+              }
+              Navigator.pop(context);
+            },
+            child: Text(AppLocalizations.of(context)!.add),
           ),
         ],
       ),

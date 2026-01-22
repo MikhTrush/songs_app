@@ -10,12 +10,14 @@ class SettingsProvider extends ChangeNotifier {
   late double _fontSize;
   late String _defaultMeetingType;
   late Locale _locale;
+  late List<String> _meetingTypes;
 
   // Геттеры для UI
   String get themeMode => _themeMode;
   double get fontSize => _fontSize;
   String get defaultMeetingType => _defaultMeetingType;
   Locale get locale => _locale;
+  List<String> get meetingTypes => _meetingTypes;
 
   // Загрузка всех настроек один раз при старте
   Future<void> load() async {
@@ -23,6 +25,7 @@ class SettingsProvider extends ChangeNotifier {
     _fontSize = await _service.getFontSize();
     _defaultMeetingType = await _service.getDefaultMeetingType();
     _locale = await _service.getLocale();
+    _meetingTypes = await _service.getMeetingTypes();
     notifyListeners();
   }
 
@@ -42,6 +45,24 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setDefaultMeetingType(String type) async {
     _defaultMeetingType = type;
     await _service.setDefaultMeetingType(type);
+    notifyListeners();
+  }
+
+  Future<void> setMeetingTypes(List<String> types) async {
+    _meetingTypes = types;
+    await _service.setMeetingTypes(types);
+    notifyListeners();
+  }
+
+  Future<void> addMeetingType(String type) async {
+    _meetingTypes.add(type);
+    await _service.addMeetingType(type);
+    notifyListeners();
+  }
+
+  Future<void> removeMeetingType(String type) async {
+    _meetingTypes.remove(type);
+    await _service.removeMeetingType(type);
     notifyListeners();
   }
 

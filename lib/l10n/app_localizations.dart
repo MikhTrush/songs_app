@@ -463,6 +463,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color'**
   String get color;
+
+  /// No description provided for @record_song_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Song Usage'**
+  String get record_song_usage;
+
+  /// No description provided for @date_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date_label;
+
+  /// No description provided for @meeting_type_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Type'**
+  String get meeting_type_label;
+
+  /// No description provided for @record.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get record;
+
+  /// No description provided for @manage_meeting_types.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Meeting Types'**
+  String get manage_meeting_types;
+
+  /// No description provided for @add_meeting_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Meeting Type'**
+  String get add_meeting_type;
+
+  /// No description provided for @enter_meeting_type_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter meeting type'**
+  String get enter_meeting_type_hint;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
 }
 
 class _AppLocalizationsDelegate

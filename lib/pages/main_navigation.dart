@@ -1,6 +1,6 @@
 // pages/main_navigation.dart
 import 'package:flutter/material.dart';
-import 'home.dart';
+import 'search.dart';
 import 'collections_page.dart';
 import 'statistics_page.dart';
 import 'recommendations_page.dart'; // Add the recommendations page
@@ -24,7 +24,7 @@ class _MainNavigationState extends State<MainNavigation> {
   //   StatisticsPage(), // index 3
   //   SettingsPage(), // index 4 - or replace with Navigator.pushNamed if you want a separate route
   // ];
-  Widget _page = HomePage();
+  Widget _page = SearchPage();
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +40,13 @@ class _MainNavigationState extends State<MainNavigation> {
           setState(() {
             _currentIndex = index;
             _page = switch (index) {
-              0 => HomePage(),
+              0 => SearchPage(),
               1 => CollectionsPage(), // index 1
               2 => RecommendationsPage(), // index 2 - newly added
               3 => StatisticsPage(), // index 3
               4 =>
                 SettingsPage(), // index 4 - or replace with Navigator.pushNamed if you want a separate route
-              _ => HomePage(),
+              _ => SearchPage(),
             };
           });
         },

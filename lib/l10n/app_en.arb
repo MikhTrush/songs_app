@@ -68,5 +68,14 @@
     "font_size_option": "Font Size",
     "meeting_type_option": "Default Meeting Type",
     "language_option": "Language",
-    "color": "Color"
+    "color": "Color",
+    "record_song_usage": "Record Song Usage",
+    "date_label": "Date",
+    "meeting_type_label": "Meeting Type",
+    "record": "Record",
+    "manage_meeting_types": "Manage Meeting Types",
+    "add_meeting_type": "Add Meeting Type",
+    "enter_meeting_type_hint": "Enter meeting type",
+    "save": "Save",
+    "add": "Add"
 }

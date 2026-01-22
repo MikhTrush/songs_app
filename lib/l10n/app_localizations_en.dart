@@ -204,4 +204,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get color => 'Color';
+
+  @override
+  String get record_song_usage => 'Record Song Usage';
+
+  @override
+  String get date_label => 'Date';
+
+  @override
+  String get meeting_type_label => 'Meeting Type';
+
+  @override
+  String get record => 'Record';
+
+  @override
+  String get manage_meeting_types => 'Manage Meeting Types';
+
+  @override
+  String get add_meeting_type => 'Add Meeting Type';
+
+  @override
+  String get enter_meeting_type_hint => 'Enter meeting type';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get add => 'Add';
 }

@@ -204,4 +204,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get color => 'Цвет';
+
+  @override
+  String get record_song_usage => 'Записать использование песни';
+
+  @override
+  String get date_label => 'Дата';
+
+  @override
+  String get meeting_type_label => 'Тип встречи';
+
+  @override
+  String get record => 'Записать';
+
+  @override
+  String get manage_meeting_types => 'Управление типами встреч';
+
+  @override
+  String get add_meeting_type => 'Добавить тип встречи';
+
+  @override
+  String get enter_meeting_type_hint => 'Введите тип встречи';
+
+  @override
+  String get save => 'Сохранить';
+
+  @override
+  String get add => 'Добавить';
 }
