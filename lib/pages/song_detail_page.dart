@@ -3,6 +3,7 @@ import 'package:intl/intl.dart'; // для форматирования даты
 import 'package:songs_app/models/song_usage.dart';
 import '../db/song_database.dart';
 import '../models/song.dart';
+import '../l10n/app_localizations.dart';
 
 class SongDetailPage extends StatefulWidget {
   final Song song;
@@ -31,10 +32,12 @@ class _SongDetailPageState extends State<SongDetailPage> {
       meetingType: _defaultMeetingType,
     );
     await SongDatabase.instance.recordUsage(usage);
-    
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Песня добавлена в статистику')),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.song_added_to_stats),
+      ),
     );
   }
 
@@ -51,7 +54,11 @@ class _SongDetailPageState extends State<SongDetailPage> {
             ElevatedButton.icon(
               onPressed: _recordUsage,
               icon: const Icon(Icons.check_circle),
-              label: Text('Спето ${DateFormat('dd.MM').format(DateTime.now())}'),
+              label: Text(
+                AppLocalizations.of(
+                  context,
+                )!.songs_spoken(DateFormat('dd.MM').format(DateTime.now())),
+              ),
             ),
             const SizedBox(height: 24),
 

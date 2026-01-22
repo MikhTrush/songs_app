@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/song.dart';
 import '../services/recommendation_service.dart';
 import 'song_detail_page.dart';
+import '../l10n/app_localizations.dart';
 
 class RecommendationsPage extends StatefulWidget {
   const RecommendationsPage({super.key});
@@ -22,7 +23,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recommendations'),
+        title: Text(AppLocalizations.of(context)!.recommendations),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -35,8 +36,8 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Enter themes or tags to get recommendations:',
+                    Text(
+                      AppLocalizations.of(context)!.enter_themes_or_tags,
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 12),
@@ -58,18 +59,18 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                           _recommendedSongs = [];
                         });
                       },
-                      children: const [
+                      children: [
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('By Themes'),
+                          child: Text(AppLocalizations.of(context)!.by_themes),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('By Tags'),
+                          child: Text(AppLocalizations.of(context)!.by_tags),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('Unused'),
+                          child: Text(AppLocalizations.of(context)!.unused),
                         ),
                       ],
                     ),
@@ -79,10 +80,12 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                       TextField(
                         controller: _activeFilter == 'themes' ? _themeController : _tagController,
                         decoration: InputDecoration(
-                          labelText: _activeFilter == 'themes' ? 'Enter themes (comma separated)' : 'Enter tags (comma separated)',
+                          labelText: _activeFilter == 'themes' 
+                              ? AppLocalizations.of(context)!.enter_themes_hint 
+                              : AppLocalizations.of(context)!.enter_tags_hint,
                           hintText: _activeFilter == 'themes' 
-                              ? 'e.g., christian, hope, worship' 
-                              : 'e.g., grace, redemption, faith',
+                              ? AppLocalizations.of(context)!.example_themes
+                              : AppLocalizations.of(context)!.example_tags,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.search),
                             onPressed: _getRecommendations,
@@ -95,7 +98,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                     
                     ElevatedButton(
                       onPressed: _getRecommendations,
-                      child: const Text('Get Recommendations'),
+                      child: Text(AppLocalizations.of(context)!.get_recommendations),
                     ),
                   ],
                 ),
@@ -125,7 +128,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                                 children: song.categories.take(3).map((cat) => 
                                   Chip(
                                     label: Text(cat, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.blue.withOpacity(0.2),
+                                    backgroundColor: Colors.blue.withAlpha(40),
                                   ),
                                 ).toList(),
                               ),
@@ -135,7 +138,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                                 children: song.tags.take(3).map((tag) => 
                                   Chip(
                                     label: Text(tag, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.green.withOpacity(0.2),
+                                    backgroundColor: Colors.green.withAlpha(40),
                                   ),
                                 ).toList(),
                               ),
@@ -145,7 +148,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                                 children: song.themes.take(3).map((theme) => 
                                   Chip(
                                     label: Text(theme, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.orange.withOpacity(0.2),
+                                    backgroundColor: Colors.orange.withAlpha(40),
                                   ),
                                 ).toList(),
                               ),
@@ -177,14 +180,14 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                         color: Colors.grey[300],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Enter themes or tags to get song recommendations',
+                      Text(
+                        AppLocalizations.of(context)!.enter_recommendations_prompt,
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Recommendations will prioritize less frequently used songs',
+                      Text(
+                        AppLocalizations.of(context)!.recommendations_info,
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),

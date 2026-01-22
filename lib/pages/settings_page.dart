@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart'; // ← ваш новый SettingsProvider
+import '../l10n/app_localizations.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -12,19 +13,19 @@ class SettingsPage extends StatelessWidget {
     final provider = context.watch<SettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings_title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Тема
           ListTile(
-            title: const Text('Тема'),
+            title: Text(AppLocalizations.of(context)!.theme_option),
             subtitle: Text(
               provider.themeMode == 'system'
-                  ? 'Как в системе'
+                  ? AppLocalizations.of(context)!.system_theme
                   : provider.themeMode == 'light'
-                      ? 'Светлая'
-                      : 'Тёмная',
+                      ? AppLocalizations.of(context)!.light_theme
+                      : AppLocalizations.of(context)!.dark_theme,
             ),
             trailing: DropdownButton<String>(
               value: provider.themeMode,
@@ -45,7 +46,7 @@ class SettingsPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Размер шрифта', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(AppLocalizations.of(context)!.font_size_option, style: TextStyle(fontWeight: FontWeight.bold)),
               Slider(
                 value: provider.fontSize,
                 min: 14,
@@ -61,7 +62,7 @@ class SettingsPage extends StatelessWidget {
 
           // Тип собрания
           ListTile(
-            title: const Text('Тип собрания по умолчанию'),
+            title: Text(AppLocalizations.of(context)!.meeting_type_option),
             subtitle: Text(provider.defaultMeetingType),
             onTap: () => _showMeetingTypeDialog(context, provider),
           ),

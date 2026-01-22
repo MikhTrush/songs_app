@@ -19,4 +19,183 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get songs_app => 'Songs App';
+
+  @override
+  String get collections => 'Collections';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get search_songs => 'Search songs...';
+
+  @override
+  String get statistics_coming_soon => 'Statistics page coming soon';
+
+  @override
+  String get confirm_delete => 'Confirm Delete';
+
+  @override
+  String are_you_sure_delete(Object name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get no_collections_yet =>
+      'No collections yet. Tap the + button to create one.';
+
+  @override
+  String get no_songs_in_collection => 'No songs in this collection';
+
+  @override
+  String error_occurred(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get edit_collection => 'Edit Collection';
+
+  @override
+  String get create_collection => 'Create Collection';
+
+  @override
+  String get name_field => 'Name *';
+
+  @override
+  String get please_enter_name => 'Please enter a name';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get select_songs => 'Select Songs:';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get recommendations => 'Recommendations';
+
+  @override
+  String get enter_themes_or_tags =>
+      'Enter themes or tags to get recommendations:';
+
+  @override
+  String get by_themes => 'By Themes';
+
+  @override
+  String get by_tags => 'By Tags';
+
+  @override
+  String get unused => 'Unused';
+
+  @override
+  String get enter_themes_hint => 'Enter themes (comma separated)';
+
+  @override
+  String get enter_tags_hint => 'Enter tags (comma separated)';
+
+  @override
+  String get example_themes => 'e.g., christian, hope, worship';
+
+  @override
+  String get example_tags => 'e.g., grace, redemption, faith';
+
+  @override
+  String get get_recommendations => 'Get Recommendations';
+
+  @override
+  String get enter_recommendations_prompt =>
+      'Enter themes or tags to get song recommendations';
+
+  @override
+  String get recommendations_info =>
+      'Recommendations will prioritize less frequently used songs';
+
+  @override
+  String get songs_app_title => 'Songs app';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String songs_count(Object count) {
+    return '$count songs';
+  }
+
+  @override
+  String get top_songs_by_usage => 'Top Songs by Usage';
+
+  @override
+  String get usage_over_time => 'Usage Over Time';
+
+  @override
+  String get usage_by_meeting_type => 'Usage by Meeting Type';
+
+  @override
+  String get total_usages => 'Total Usages';
+
+  @override
+  String get unique_songs => 'Unique Songs';
+
+  @override
+  String get active_days => 'Active Days';
+
+  @override
+  String times_used(Object count) {
+    return '$count times';
+  }
+
+  @override
+  String songs_spoken(Object date) {
+    return 'Speto $date';
+  }
+
+  @override
+  String get song_added_to_stats => 'Song added to statistics';
+
+  @override
+  String get default_meeting_type => 'Default meeting type';
+
+  @override
+  String get theme_settings => 'Theme';
+
+  @override
+  String get system_theme => 'System theme';
+
+  @override
+  String get light_theme => 'Light theme';
+
+  @override
+  String get dark_theme => 'Dark theme';
+
+  @override
+  String get font_size => 'Font size';
+
+  @override
+  String get settings_title => 'Settings';
+
+  @override
+  String get theme_option => 'Theme';
+
+  @override
+  String get font_size_option => 'Font Size';
+
+  @override
+  String get meeting_type_option => 'Default Meeting Type';
 }

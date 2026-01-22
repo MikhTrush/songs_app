@@ -3,6 +3,7 @@ import '../db/song_database.dart';
 import '../models/collection.dart';
 import '../models/song.dart';
 import 'song_detail_page.dart';
+import '../l10n/app_localizations.dart';
 
 class CollectionsPage extends StatefulWidget {
   const CollectionsPage({super.key});
@@ -24,7 +25,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Collections'),
+        title: Text(AppLocalizations.of(context)!.collections),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -40,16 +41,20 @@ class _CollectionsPageState extends State<CollectionsPage> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(
+                  context,
+                )!.error_occurred(snapshot.error.toString()),
+              ),
+            );
           }
 
           final collections = snapshot.data ?? [];
 
           if (collections.isEmpty) {
-            return const Center(
-              child: Text(
-                'No collections yet. Tap the + button to create one.',
-              ),
+            return Center(
+              child: Text(AppLocalizations.of(context)!.no_collections_yet),
             );
           }
 
@@ -60,7 +65,11 @@ class _CollectionsPageState extends State<CollectionsPage> {
               return Card(
                 child: ExpansionTile(
                   title: Text(collection.name),
-                  subtitle: Text('${collection.songIds.length} songs'),
+                  subtitle: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.songs_count(collection.songIds.length),
+                  ),
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -85,14 +94,20 @@ class _CollectionsPageState extends State<CollectionsPage> {
                               }
 
                               if (songsSnapshot.hasError) {
-                                return Text('Error: ${songsSnapshot.error}');
+                                return Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.error_occurred(songsSnapshot.error ?? ""),
+                                );
                               }
 
                               final songs = songsSnapshot.data ?? [];
 
                               if (songs.isEmpty) {
-                                return const Text(
-                                  'No songs in this collection',
+                                return Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.no_songs_in_collection,
                                 );
                               }
 
@@ -123,7 +138,9 @@ class _CollectionsPageState extends State<CollectionsPage> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   icon: const Icon(Icons.edit),
-                                  label: const Text('Edit'),
+                                  label: Text(
+                                    AppLocalizations.of(context)!.edit,
+                                  ),
                                   onPressed: () =>
                                       _editCollection(context, collection),
                                 ),
@@ -132,7 +149,9 @@ class _CollectionsPageState extends State<CollectionsPage> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   icon: const Icon(Icons.delete),
-                                  label: const Text('Delete'),
+                                  label: Text(
+                                    AppLocalizations.of(context)!.delete,
+                                  ),
                                   onPressed: () =>
                                       _deleteCollection(context, collection),
                                   style: ElevatedButton.styleFrom(
@@ -207,12 +226,14 @@ class _CollectionsPageState extends State<CollectionsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete "${collection.name}"?'),
+        title: Text(AppLocalizations.of(context)!.confirm_delete),
+        content: Text(
+          AppLocalizations.of(context)!.are_you_sure_delete(collection.name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -222,7 +243,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
                 _collectionsFuture = SongDatabase.instance.getAllCollections();
               });
             },
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -274,7 +295,9 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        widget.collection != null ? 'Edit Collection' : 'Create Collection',
+        widget.collection != null
+            ? AppLocalizations.of(context)!.edit_collection
+            : AppLocalizations.of(context)!.create_collection,
       ),
       content: SizedBox(
         width: double.maxFinite,
@@ -287,22 +310,26 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name *'),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name_field,
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return AppLocalizations.of(context)!.please_enter_name;
                     }
                     return null;
                   },
                 ),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description,
+                  ),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Select Songs:',
+                Text(
+                  AppLocalizations.of(context)!.select_songs,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -314,7 +341,11 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
                     }
 
                     if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
+                      return Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.error_occurred(snapshot.error.toString()),
+                      );
                     }
 
                     final songs = snapshot.data ?? [];
@@ -348,7 +379,7 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: () {
@@ -364,7 +395,11 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
               Navigator.pop(context, collection);
             }
           },
-          child: Text(widget.collection != null ? 'Update' : 'Create'),
+          child: Text(
+            widget.collection != null
+                ? AppLocalizations.of(context)!.update
+                : AppLocalizations.of(context)!.create,
+          ),
         ),
       ],
     );

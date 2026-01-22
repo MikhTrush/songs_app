@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../db/song_database.dart';
 import '../models/song.dart';
 import 'song_detail_page.dart';
+import '../l10n/app_localizations.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -33,9 +34,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Statistics'),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.statistics)),
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
@@ -51,32 +50,32 @@ class _StatisticsPageState extends State<StatisticsPage> {
               children: [
                 // Summary Cards
                 _buildSummaryCards(),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Top Songs by Usage
-                const Text(
-                  'Top Songs by Usage',
+                Text(
+                  AppLocalizations.of(context)!.top_songs_by_usage,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 _buildTopSongsList(),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Usage Chart
-                const Text(
-                  'Usage Over Time',
+                Text(
+                  AppLocalizations.of(context)!.usage_over_time,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 _buildUsageChart(),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Meeting Types Breakdown
-                const Text(
-                  'Usage by Meeting Type',
+                Text(
+                  AppLocalizations.of(context)!.usage_by_meeting_type,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -102,7 +101,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         }
 
         final usageData = snapshot.data ?? [];
-        
+
         // Calculate summary stats
         int totalUsages = usageData.length;
         Set<String> uniqueSongs = {};
@@ -110,9 +109,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
         for (var record in usageData) {
           uniqueSongs.add(record['title'].toString());
-          
+
           DateTime date = DateTime.parse(record['used_at'].toString());
-          uniqueDates.add(DateTime(date.year, date.month, date.day)); // Normalize to day
+          uniqueDates.add(
+            DateTime(date.year, date.month, date.day),
+          ); // Normalize to day
         }
 
         return Card(
@@ -121,9 +122,21 @@ class _StatisticsPageState extends State<StatisticsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatCard('Total Usages', totalUsages.toString(), Icons.play_circle_outline),
-                _buildStatCard('Unique Songs', uniqueSongs.length.toString(), Icons.music_note),
-                _buildStatCard('Active Days', uniqueDates.length.toString(), Icons.calendar_today),
+                _buildStatCard(
+                  AppLocalizations.of(context)!.total_usages,
+                  totalUsages.toString(),
+                  Icons.play_circle_outline,
+                ),
+                _buildStatCard(
+                  AppLocalizations.of(context)!.unique_songs,
+                  uniqueSongs.length.toString(),
+                  Icons.music_note,
+                ),
+                _buildStatCard(
+                  AppLocalizations.of(context)!.active_days,
+                  uniqueDates.length.toString(),
+                  Icons.calendar_today,
+                ),
               ],
             ),
           ),
@@ -169,27 +182,29 @@ class _StatisticsPageState extends State<StatisticsPage> {
         }
 
         final usageData = snapshot.data ?? [];
-        
+
         // Count usages per song
         Map<String, int> songUsageCounts = {};
         for (var record in usageData) {
           String title = record['title'].toString();
           songUsageCounts[title] = (songUsageCounts[title] ?? 0) + 1;
         }
-        
+
         // Sort by usage count descending
         var sortedEntries = songUsageCounts.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
-        
+
         // Get top 10 songs
         var topSongs = sortedEntries.take(10).toList();
 
         if (topSongs.isEmpty) {
-          return const Card(
+          return Card(
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'No usage data yet. Sing some songs to see statistics.',
+                AppLocalizations.of(
+                  context,
+                )!.no_collections_yet, // Reusing this text since it's similar
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
@@ -206,13 +221,20 @@ class _StatisticsPageState extends State<StatisticsPage> {
               final entry = topSongs[index];
               return ListTile(
                 title: Text(entry.key),
-                subtitle: Text('${entry.value} times'),
+                subtitle: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.times_used(entry.value.toString()),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () async {
                   // Find the actual song object by title
                   final allSongs = await SongDatabase.instance.getAllSongs();
-                  final song = allSongs.firstWhere((s) => s.title == entry.key, orElse: () => allSongs.first);
-                  
+                  final song = allSongs.firstWhere(
+                    (s) => s.title == entry.key,
+                    orElse: () => allSongs.first,
+                  );
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -241,7 +263,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         }
 
         final usageData = snapshot.data ?? [];
-        
+
         // Group by date
         Map<DateTime, int> usageByDate = {};
         for (var record in usageData) {
@@ -249,12 +271,18 @@ class _StatisticsPageState extends State<StatisticsPage> {
           DateTime date = DateTime(rawDate.year, rawDate.month, rawDate.day);
           usageByDate[date] = (usageByDate[date] ?? 0) + 1;
         }
-        
+
         // Convert to chart data
-        List<FlSpot> spots = usageByDate.entries
-            .map((entry) => FlSpot(entry.key.millisecondsSinceEpoch.toDouble(), entry.value.toDouble()))
-            .toList()
-          ..sort((a, b) => a.x.compareTo(b.x));
+        List<FlSpot> spots =
+            usageByDate.entries
+                .map(
+                  (entry) => FlSpot(
+                    entry.key.millisecondsSinceEpoch.toDouble(),
+                    entry.value.toDouble(),
+                  ),
+                )
+                .toList()
+              ..sort((a, b) => a.x.compareTo(b.x));
 
         if (spots.isEmpty) {
           return Card(
@@ -282,9 +310,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: spots.length > 1 ? (spots.last.x - spots.first.x) / 5 : spots.first.x,
+                      interval: spots.length > 1
+                          ? (spots.last.x - spots.first.x) / 5
+                          : spots.first.x,
                       getTitlesWidget: (value, meta) {
-                        DateTime date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                        DateTime date = DateTime.fromMillisecondsSinceEpoch(
+                          value.toInt(),
+                        );
                         return Text("${date.month}/${date.day}");
                       },
                     ),
@@ -309,7 +341,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     dotData: const FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.blue.withOpacity(0.3),
+                      color: Colors.blue.withAlpha(40),
                     ),
                   ),
                 ],
@@ -334,14 +366,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
         }
 
         final usageData = snapshot.data ?? [];
-        
+
         // Group by meeting type
         Map<String, int> usageByType = {};
         for (var record in usageData) {
           String type = record['meeting_type'].toString();
           usageByType[type] = (usageByType[type] ?? 0) + 1;
         }
-        
+
         // Create pie chart data
         List<PieChartSectionData> sections = usageByType.entries
             .toList()
@@ -352,7 +384,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               var item = entry.value;
               double radius = 100.0;
               double value = item.value.toDouble();
-              
+
               return PieChartSectionData(
                 color: _getColorForIndex(index),
                 value: value,
@@ -391,7 +423,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 sectionsSpace: 2,
                 pieTouchData: PieTouchData(
                   enabled: true,
-                  touchCallback: (FlTouchEvent event, PieTouchResponse? response) {},
+                  touchCallback:
+                      (FlTouchEvent event, PieTouchResponse? response) {},
                 ),
               ),
             ),

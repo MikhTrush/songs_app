@@ -121,6 +121,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Songs App'**
   String get songs_app;
+
+  /// No description provided for @collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get collections;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics;
+
+  /// No description provided for @search_songs.
+  ///
+  /// In en, this message translates to:
+  /// **'Search songs...'**
+  String get search_songs;
+
+  /// No description provided for @statistics_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics page coming soon'**
+  String get statistics_coming_soon;
+
+  /// No description provided for @confirm_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get confirm_delete;
+
+  /// No description provided for @are_you_sure_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String are_you_sure_delete(Object name);
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @no_collections_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections yet. Tap the + button to create one.'**
+  String get no_collections_yet;
+
+  /// No description provided for @no_songs_in_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs in this collection'**
+  String get no_songs_in_collection;
+
+  /// No description provided for @error_occurred.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String error_occurred(Object error);
+
+  /// No description provided for @edit_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Collection'**
+  String get edit_collection;
+
+  /// No description provided for @create_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Collection'**
+  String get create_collection;
+
+  /// No description provided for @name_field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name *'**
+  String get name_field;
+
+  /// No description provided for @please_enter_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name'**
+  String get please_enter_name;
+
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// No description provided for @select_songs.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Songs:'**
+  String get select_songs;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @recommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get recommendations;
+
+  /// No description provided for @enter_themes_or_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter themes or tags to get recommendations:'**
+  String get enter_themes_or_tags;
+
+  /// No description provided for @by_themes.
+  ///
+  /// In en, this message translates to:
+  /// **'By Themes'**
+  String get by_themes;
+
+  /// No description provided for @by_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'By Tags'**
+  String get by_tags;
+
+  /// No description provided for @unused.
+  ///
+  /// In en, this message translates to:
+  /// **'Unused'**
+  String get unused;
+
+  /// No description provided for @enter_themes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter themes (comma separated)'**
+  String get enter_themes_hint;
+
+  /// No description provided for @enter_tags_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter tags (comma separated)'**
+  String get enter_tags_hint;
+
+  /// No description provided for @example_themes.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., christian, hope, worship'**
+  String get example_themes;
+
+  /// No description provided for @example_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., grace, redemption, faith'**
+  String get example_tags;
+
+  /// No description provided for @get_recommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Recommendations'**
+  String get get_recommendations;
+
+  /// No description provided for @enter_recommendations_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter themes or tags to get song recommendations'**
+  String get enter_recommendations_prompt;
+
+  /// No description provided for @recommendations_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations will prioritize less frequently used songs'**
+  String get recommendations_info;
+
+  /// No description provided for @songs_app_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs app'**
+  String get songs_app_title;
+
+  /// No description provided for @menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menu;
+
+  /// No description provided for @songs_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} songs'**
+  String songs_count(Object count);
+
+  /// No description provided for @top_songs_by_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Songs by Usage'**
+  String get top_songs_by_usage;
+
+  /// No description provided for @usage_over_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Over Time'**
+  String get usage_over_time;
+
+  /// No description provided for @usage_by_meeting_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage by Meeting Type'**
+  String get usage_by_meeting_type;
+
+  /// No description provided for @total_usages.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Usages'**
+  String get total_usages;
+
+  /// No description provided for @unique_songs.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Songs'**
+  String get unique_songs;
+
+  /// No description provided for @active_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Days'**
+  String get active_days;
+
+  /// No description provided for @times_used.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times'**
+  String times_used(Object count);
+
+  /// No description provided for @songs_spoken.
+  ///
+  /// In en, this message translates to:
+  /// **'Speto {date}'**
+  String songs_spoken(Object date);
+
+  /// No description provided for @song_added_to_stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Song added to statistics'**
+  String get song_added_to_stats;
+
+  /// No description provided for @default_meeting_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Default meeting type'**
+  String get default_meeting_type;
+
+  /// No description provided for @theme_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme_settings;
+
+  /// No description provided for @system_theme.
+  ///
+  /// In en, this message translates to:
+  /// **'System theme'**
+  String get system_theme;
+
+  /// No description provided for @light_theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light theme'**
+  String get light_theme;
+
+  /// No description provided for @dark_theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark theme'**
+  String get dark_theme;
+
+  /// No description provided for @font_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Font size'**
+  String get font_size;
+
+  /// No description provided for @settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings_title;
+
+  /// No description provided for @theme_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme_option;
+
+  /// No description provided for @font_size_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get font_size_option;
+
+  /// No description provided for @meeting_type_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Meeting Type'**
+  String get meeting_type_option;
 }
 
 class _AppLocalizationsDelegate

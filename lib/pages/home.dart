@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
           TextField(
             onChanged: _onSearch,
             decoration: InputDecoration(
-              hintText: 'Search songs...',
+              hintText: AppLocalizations.of(context)!.search_songs,
               prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(),
             ),
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                                   song.tags.take(2).join(', '),
                                   style: TextStyle(fontSize: 10),
                                 ),
-                                backgroundColor: Colors.blue.withOpacity(0.2),
+                                backgroundColor: Colors.blue.withAlpha(40),
                               ),
                             if (song.themes.isNotEmpty)
                               Chip(
@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                                   song.themes.take(2).join(', '),
                                   style: TextStyle(fontSize: 10),
                                 ),
-                                backgroundColor: Colors.green.withOpacity(0.2),
+                                backgroundColor: Colors.green.withAlpha(40),
                               ),
                           ],
                         )
@@ -128,7 +128,7 @@ class _HomePageState extends State<HomePage> {
 
   AppBar _appbar(BuildContext context) {
     return AppBar(
-      title: Text('Songs app'),
+      title: Text(AppLocalizations.of(context)!.songs_app_title),
       elevation: 0,
       centerTitle: true,
       leading: Container(
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Icon(Icons.collections),
                     SizedBox(width: 8),
-                    Text('Collections'),
+                    Text(AppLocalizations.of(context)!.collections),
                   ],
                 ),
               ),
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Icon(Icons.calculate), // Changed to a calculation icon for stats
                     SizedBox(width: 8),
-                    Text('Statistics'),
+                    Text(AppLocalizations.of(context)!.statistics),
                   ],
                 ),
               ),
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Icon(Icons.settings),
                     SizedBox(width: 8),
-                    Text('Settings'),
+                    Text(AppLocalizations.of(context)!.settings),
                   ],
                 ),
               ),
@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
               } else if (value == 'statistics') {
                 // We'll implement statistics page later in Phase 2
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Statistics page coming soon')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.statistics_coming_soon)),
                 );
               } else if (value == 'settings') {
                 Navigator.pushNamed(context, '/settings');
