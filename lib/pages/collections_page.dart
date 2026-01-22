@@ -24,9 +24,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.collections),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.collections)),
       body: FutureBuilder<List<Collection>>(
         future: _collectionsFuture,
         builder: (context, snapshot) {
@@ -91,17 +89,19 @@ class _CollectionsPageState extends State<CollectionsPage> {
                                     ConnectionState.waiting) {
                                   return const LinearProgressIndicator();
                                 }
-            
+
                                 if (songsSnapshot.hasError) {
                                   return Text(
                                     AppLocalizations.of(
                                       context,
-                                    )!.error_occurred(songsSnapshot.error ?? ""),
+                                    )!.error_occurred(
+                                      songsSnapshot.error ?? "",
+                                    ),
                                   );
                                 }
-            
+
                                 final songs = songsSnapshot.data ?? [];
-            
+
                                 if (songs.isEmpty) {
                                   return Text(
                                     AppLocalizations.of(
@@ -109,7 +109,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
                                     )!.no_songs_in_collection,
                                   );
                                 }
-            
+
                                 return Column(
                                   children: songs
                                       .map(
@@ -172,11 +172,10 @@ class _CollectionsPageState extends State<CollectionsPage> {
           );
         },
       ),
-      floatingActionButton: 
-      FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _createNewCollection(context),
         child: Icon(Icons.add),
-      )
+      ),
     );
   }
 
@@ -334,43 +333,25 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                FutureBuilder<List<Song>>(
-                  future: SongDatabase.instance.getAllSongs(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const LinearProgressIndicator();
-                    }
-
-                    if (snapshot.hasError) {
-                      return Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.error_occurred(snapshot.error.toString()),
-                      );
-                    }
-
-                    final songs = snapshot.data ?? [];
-
-                    return Column(
-                      children: songs
-                          .map(
-                            (song) => CheckboxListTile(
-                              title: Text(song.title),
-                              value: _selectedSongIds.contains(song.id),
-                              onChanged: (checked) {
-                                setState(() {
-                                  if (checked == true) {
-                                    _selectedSongIds.add(song.id);
-                                  } else {
-                                    _selectedSongIds.remove(song.id);
-                                  }
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    );
-                  },
+                Column(
+                  children: _allSongs
+                      .map(
+                        (song) => CheckboxListTile(
+                          key: ValueKey(song.id),
+                          title: Text(song.title),
+                          value: _selectedSongIds.contains(song.id),
+                          onChanged: (checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _selectedSongIds.add(song.id);
+                              } else {
+                                _selectedSongIds.remove(song.id);
+                              }
+                            });
+                          },
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ),
