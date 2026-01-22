@@ -50,18 +50,6 @@ class _SongDetailPageState extends State<SongDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Кнопка "Спето сегодня"
-            ElevatedButton.icon(
-              onPressed: _recordUsage,
-              icon: const Icon(Icons.check_circle),
-              label: Text(
-                AppLocalizations.of(
-                  context,
-                )!.songs_spoken(DateFormat('dd.MM').format(DateTime.now())),
-              ),
-            ),
-            const SizedBox(height: 24),
-
             // Отображение куплетов
             Expanded(
               child: ListView.builder(
@@ -79,6 +67,12 @@ class _SongDetailPageState extends State<SongDetailPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _recordUsage();
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -24,8 +24,8 @@ class SettingsPage extends StatelessWidget {
               provider.themeMode == 'system'
                   ? AppLocalizations.of(context)!.system_theme
                   : provider.themeMode == 'light'
-                      ? AppLocalizations.of(context)!.light_theme
-                      : AppLocalizations.of(context)!.dark_theme,
+                  ? AppLocalizations.of(context)!.light_theme
+                  : AppLocalizations.of(context)!.dark_theme,
             ),
             trailing: DropdownButton<String>(
               value: provider.themeMode,
@@ -47,13 +47,12 @@ class SettingsPage extends StatelessWidget {
             trailing: DropdownButton<String>(
               value: provider.locale.languageCode,
               items: [
-              ...AppLocalizations.supportedLocales
-                .map(
+                ...AppLocalizations.supportedLocales.map(
                   (locale) => DropdownMenuItem(
                     value: locale.languageCode,
                     child: Text(locale.languageCode),
                   ),
-                )
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -66,7 +65,10 @@ class SettingsPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppLocalizations.of(context)!.font_size_option, style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context)!.font_size_option,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Slider(
                 value: provider.fontSize,
                 min: 14,
@@ -100,7 +102,9 @@ class SettingsPage extends StatelessWidget {
         title: const Text('Тип собрания'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: 'Например: Вечернее собрание'),
+          decoration: const InputDecoration(
+            hintText: 'Например: Вечернее собрание',
+          ),
         ),
         actions: [
           TextButton(

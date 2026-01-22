@@ -201,4 +201,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get language_option => 'Язык';
+
+  @override
+  String get color => 'Цвет';
 }

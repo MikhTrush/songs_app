@@ -26,12 +26,6 @@ class _CollectionsPageState extends State<CollectionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.collections),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _createNewCollection(context),
-          ),
-        ],
       ),
       body: FutureBuilder<List<Collection>>(
         future: _collectionsFuture,
@@ -53,129 +47,136 @@ class _CollectionsPageState extends State<CollectionsPage> {
           final collections = snapshot.data ?? [];
 
           if (collections.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context)!.no_collections_yet),
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(AppLocalizations.of(context)!.no_collections_yet),
+              ),
             );
           }
 
-          return ListView.builder(
-            itemCount: collections.length,
-            itemBuilder: (context, index) {
-              final collection = collections[index];
-              return Card(
-                child: ExpansionTile(
-                  title: Text(collection.name),
-                  subtitle: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.songs_count(collection.songIds.length),
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (collection.description.isNotEmpty)
-                            Text(
-                              collection.description,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          const SizedBox(height: 8),
-                          FutureBuilder<List<Song>>(
-                            future: _getSongsForCollection(collection),
-                            builder: (context, songsSnapshot) {
-                              if (songsSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const LinearProgressIndicator();
-                              }
-
-                              if (songsSnapshot.hasError) {
-                                return Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.error_occurred(songsSnapshot.error ?? ""),
-                                );
-                              }
-
-                              final songs = songsSnapshot.data ?? [];
-
-                              if (songs.isEmpty) {
-                                return Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.no_songs_in_collection,
-                                );
-                              }
-
-                              return Column(
-                                children: songs
-                                    .map(
-                                      (song) => ListTile(
-                                        title: Text(song.title),
-                                        dense: true,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SongDetailPage(song: song),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  icon: const Icon(Icons.edit),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.edit,
-                                  ),
-                                  onPressed: () =>
-                                      _editCollection(context, collection),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  icon: const Icon(Icons.delete),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.delete,
-                                  ),
-                                  onPressed: () =>
-                                      _deleteCollection(context, collection),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: collections.length,
+              itemBuilder: (context, index) {
+                final collection = collections[index];
+                return Card(
+                  child: ExpansionTile(
+                    title: Text(collection.name),
+                    subtitle: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.songs_count(collection.songIds.length),
                     ),
-                  ],
-                ),
-              );
-            },
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (collection.description.isNotEmpty)
+                              Text(
+                                collection.description,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            const SizedBox(height: 8),
+                            FutureBuilder<List<Song>>(
+                              future: _getSongsForCollection(collection),
+                              builder: (context, songsSnapshot) {
+                                if (songsSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const LinearProgressIndicator();
+                                }
+            
+                                if (songsSnapshot.hasError) {
+                                  return Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.error_occurred(songsSnapshot.error ?? ""),
+                                  );
+                                }
+            
+                                final songs = songsSnapshot.data ?? [];
+            
+                                if (songs.isEmpty) {
+                                  return Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.no_songs_in_collection,
+                                  );
+                                }
+            
+                                return Column(
+                                  children: songs
+                                      .map(
+                                        (song) => ListTile(
+                                          title: Text(song.title),
+                                          dense: true,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SongDetailPage(song: song),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                      .toList(),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(Icons.edit),
+                                    label: Text(
+                                      AppLocalizations.of(context)!.edit,
+                                    ),
+                                    onPressed: () =>
+                                        _editCollection(context, collection),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(Icons.delete),
+                                    label: Text(
+                                      AppLocalizations.of(context)!.delete,
+                                    ),
+                                    onPressed: () =>
+                                        _deleteCollection(context, collection),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
-      floatingActionButton: IconButton(
+      floatingActionButton: 
+      FloatingActionButton(
         onPressed: () => _createNewCollection(context),
-        icon: Icon(Icons.add),
-      ),
+        child: Icon(Icons.add),
+      )
     );
   }
 

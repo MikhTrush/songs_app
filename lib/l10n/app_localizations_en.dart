@@ -201,4 +201,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language_option => 'Language';
+
+  @override
+  String get color => 'Color';
 }

@@ -1,3 +1,12 @@
+// enum Familiarity {
+//   unknown,
+//   notFamiliar,
+//   slightlyFamiliar,
+//   familiar,
+//   veryFamiliar,
+//   extremelyFamiliar
+// }
+
 class Song {
   final int id;
   final String title;
@@ -5,6 +14,8 @@ class Song {
   final List<String> categories;  // for general categories
   final List<String> tags;        // for specific tags
   final List<String> themes;      // for thematic tags
+  // final Familiarity familiarity;
+  // final int? number;
 
   Song({
     required this.id,
@@ -13,6 +24,8 @@ class Song {
     this.categories = const [],
     this.tags = const [],
     this.themes = const [],
+    // this.familiarity = Familiarity.unknown,
+    // this.number
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +36,8 @@ class Song {
       'categories': categories.join(','),
       'tags': tags.join(','),
       'themes': themes.join(','),
+      // 'familiarity': familiarity.index,
+      // 'number': number,
     };
   }
 
@@ -43,6 +58,9 @@ class Song {
     final themesStr = map['themes'] as String?;
     final themes = themesStr?.split(',').where((s) => s.isNotEmpty).toList() ?? [];
 
+    // final familiarity = map['familiarity'] as Familiarity? ?? Familiarity.unknown;
+    // final number = map['number'] as int?;
+
     return Song(
       id: map['id'],
       title: map['title'],
@@ -50,6 +68,8 @@ class Song {
       categories: categories,
       tags: tags,
       themes: themes,
+      // familiarity: familiarity,
+      // number: number,
     );
   }
 }

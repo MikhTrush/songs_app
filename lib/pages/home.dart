@@ -83,32 +83,62 @@ class _HomePageState extends State<HomePage> {
                 final song = _searchResults[index];
                 return ListTile(
                   title: Text(song.title),
-                  subtitle: Text(
-                    '${song.verses[0].substring(0, min(60, song.verses[0].length))}...',
-                  ),
-                  trailing: song.tags.isNotEmpty || song.themes.isNotEmpty
-                      ? Wrap(
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${song.verses[0].substring(0, min(60, song.verses[0].length))}...',
+                      ),
+                      if (song.categories.isNotEmpty)
+                        Wrap(
                           spacing: 4,
-                          children: [
-                            if (song.tags.isNotEmpty)
-                              Chip(
-                                label: Text(
-                                  song.tags.take(2).join(', '),
-                                  style: TextStyle(fontSize: 10),
+                          children: song.categories
+                              .take(3)
+                              .map(
+                                (cat) => Chip(
+                                  label: Text(
+                                    cat,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  backgroundColor: Colors.blue.withAlpha(40),
                                 ),
-                                backgroundColor: Colors.blue.withAlpha(40),
-                              ),
-                            if (song.themes.isNotEmpty)
-                              Chip(
-                                label: Text(
-                                  song.themes.take(2).join(', '),
-                                  style: TextStyle(fontSize: 10),
+                              )
+                              .toList(),
+                        ),
+                      if (song.tags.isNotEmpty)
+                        Wrap(
+                          spacing: 4,
+                          children: song.tags
+                              .take(3)
+                              .map(
+                                (tag) => Chip(
+                                  label: Text(
+                                    tag,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  backgroundColor: Colors.green.withAlpha(40),
                                 ),
-                                backgroundColor: Colors.green.withAlpha(40),
-                              ),
-                          ],
-                        )
-                      : null,
+                              )
+                              .toList(),
+                        ),
+                      if (song.themes.isNotEmpty)
+                        Wrap(
+                          spacing: 4,
+                          children: song.themes
+                              .take(3)
+                              .map(
+                                (theme) => Chip(
+                                  label: Text(
+                                    theme,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  backgroundColor: Colors.orange.withAlpha(40),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -133,17 +163,13 @@ class _HomePageState extends State<HomePage> {
       centerTitle: true,
       leading: Container(
         margin: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
         child: Icon(Icons.menu, color: Theme.of(context).iconTheme.color),
       ),
       actions: [
         Container(
           margin: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
           child: PopupMenuButton(
             icon: Icon(
               Icons.more_vert,
@@ -164,7 +190,9 @@ class _HomePageState extends State<HomePage> {
                 value: 'statistics',
                 child: Row(
                   children: [
-                    Icon(Icons.calculate), // Changed to a calculation icon for stats
+                    Icon(
+                      Icons.calculate,
+                    ), // Changed to a calculation icon for stats
                     SizedBox(width: 8),
                     Text(AppLocalizations.of(context)!.statistics),
                   ],
@@ -190,7 +218,11 @@ class _HomePageState extends State<HomePage> {
               } else if (value == 'statistics') {
                 // We'll implement statistics page later in Phase 2
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.statistics_coming_soon)),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.statistics_coming_soon,
+                    ),
+                  ),
                 );
               } else if (value == 'settings') {
                 Navigator.pushNamed(context, '/settings');
@@ -232,17 +264,15 @@ class _HomePageState extends State<HomePage> {
               return Container(
                 width: 100,
                 decoration: BoxDecoration(
-                  color: Color(int.parse('0xFF${categories[index].colorHex.substring(1)}')),
+                  color: Color(
+                    int.parse('0xFF${categories[index].colorHex.substring(1)}'),
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      categories[index].icon,
-                      color: Colors.white,
-                      size: 30,
-                    ),
+                    Icon(categories[index].icon, color: Colors.white, size: 30),
                     SizedBox(height: 8),
                     Text(
                       categories[index].name,

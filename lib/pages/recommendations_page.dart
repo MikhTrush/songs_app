@@ -28,6 +28,7 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Input section for themes/tags
             Card(
@@ -38,23 +39,26 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                   children: [
                     Text(
                       AppLocalizations.of(context)!.enter_themes_or_tags,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     // Tabs for switching between themes and tags input
                     ToggleButtons(
                       isSelected: [
                         _activeFilter == 'themes',
                         _activeFilter == 'tags',
-                        _activeFilter == 'unused'
+                        _activeFilter == 'unused',
                       ],
                       onPressed: (index) {
                         setState(() {
                           if (index == 0) _activeFilter = 'themes';
                           if (index == 1) _activeFilter = 'tags';
                           if (index == 2) _activeFilter = 'unused';
-                          
+
                           // Clear the recommendations when switching tabs
                           _recommendedSongs = [];
                         });
@@ -75,15 +79,17 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    
+
                     if (_activeFilter != 'unused') ...[
                       TextField(
-                        controller: _activeFilter == 'themes' ? _themeController : _tagController,
+                        controller: _activeFilter == 'themes'
+                            ? _themeController
+                            : _tagController,
                         decoration: InputDecoration(
-                          labelText: _activeFilter == 'themes' 
-                              ? AppLocalizations.of(context)!.enter_themes_hint 
+                          labelText: _activeFilter == 'themes'
+                              ? AppLocalizations.of(context)!.enter_themes_hint
                               : AppLocalizations.of(context)!.enter_tags_hint,
-                          hintText: _activeFilter == 'themes' 
+                          hintText: _activeFilter == 'themes'
                               ? AppLocalizations.of(context)!.example_themes
                               : AppLocalizations.of(context)!.example_tags,
                           suffixIcon: IconButton(
@@ -95,108 +101,151 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
                       ),
                       const SizedBox(height: 8),
                     ],
-                    
-                    ElevatedButton(
-                      onPressed: _getRecommendations,
-                      child: Text(AppLocalizations.of(context)!.get_recommendations),
-                    ),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Results section
-            if (_isLoading)
-              const LinearProgressIndicator()
-            else if (_recommendedSongs.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _recommendedSongs.length,
-                  itemBuilder: (context, index) {
-                    final song = _recommendedSongs[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(song.title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (song.categories.isNotEmpty)
-                              Wrap(
-                                spacing: 4,
-                                children: song.categories.take(3).map((cat) => 
-                                  Chip(
-                                    label: Text(cat, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.blue.withAlpha(40),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: LinearProgressIndicator())
+                  : ListView.builder(
+                      itemCount: _recommendedSongs.isEmpty
+                          ? 1
+                          : _recommendedSongs.length,
+                      itemBuilder: (context, index) {
+                        if (_recommendedSongs.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome,
+                                  size: 80,
+                                  color: Colors.grey[300],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.enter_recommendations_prompt,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
                                   ),
-                                ).toList(),
-                              ),
-                            if (song.tags.isNotEmpty)
-                              Wrap(
-                                spacing: 4,
-                                children: song.tags.take(3).map((tag) => 
-                                  Chip(
-                                    label: Text(tag, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.green.withAlpha(40),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.recommendations_info,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
                                   ),
-                                ).toList(),
-                              ),
-                            if (song.themes.isNotEmpty)
-                              Wrap(
-                                spacing: 4,
-                                children: song.themes.take(3).map((theme) => 
-                                  Chip(
-                                    label: Text(theme, style: const TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.orange.withAlpha(40),
-                                  ),
-                                ).toList(),
-                              ),
-                          ],
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SongDetailPage(song: song),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              )
-            else if (!_isLoading)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 80,
-                        color: Colors.grey[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        AppLocalizations.of(context)!.enter_recommendations_prompt,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context)!.recommendations_info,
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                        }
+
+                        final song = _recommendedSongs[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(song.title),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (song.categories.isNotEmpty)
+                                  Wrap(
+                                    spacing: 4,
+                                    children: song.categories
+                                        .take(3)
+                                        .map(
+                                          (cat) => Chip(
+                                            label: Text(
+                                              cat,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.blue
+                                                .withAlpha(40),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                if (song.tags.isNotEmpty)
+                                  Wrap(
+                                    spacing: 4,
+                                    children: song.tags
+                                        .take(3)
+                                        .map(
+                                          (tag) => Chip(
+                                            label: Text(
+                                              tag,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.green
+                                                .withAlpha(40),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                if (song.themes.isNotEmpty)
+                                  Wrap(
+                                    spacing: 4,
+                                    children: song.themes
+                                        .take(3)
+                                        .map(
+                                          (theme) => Chip(
+                                            label: Text(
+                                              theme,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.orange
+                                                .withAlpha(40),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                              ],
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SongDetailPage(song: song),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() {
+          _getRecommendations();
+        }),
+        child: Icon(Icons.auto_awesome),
       ),
     );
   }
@@ -213,13 +262,15 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
         final themesInput = _themeController.text.trim();
         if (themesInput.isNotEmpty) {
           final themes = themesInput.split(',').map((s) => s.trim()).toList();
-          recommendations = await _recommendationService.getRecommendationsByTheme(themes);
+          recommendations = await _recommendationService
+              .getRecommendationsByTheme(themes);
         }
       } else if (_activeFilter == 'tags') {
         final tagsInput = _tagController.text.trim();
         if (tagsInput.isNotEmpty) {
           final tags = tagsInput.split(',').map((s) => s.trim()).toList();
-          recommendations = await _recommendationService.getRecommendationsByTags(tags);
+          recommendations = await _recommendationService
+              .getRecommendationsByTags(tags);
         }
       } else if (_activeFilter == 'unused') {
         recommendations = await _recommendationService.getUnusedSongs();
