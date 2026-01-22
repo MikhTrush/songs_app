@@ -198,4 +198,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get meeting_type_option => 'Тип встречи по умолчанию';
+
+  @override
+  String get language_option => 'Язык';
 }

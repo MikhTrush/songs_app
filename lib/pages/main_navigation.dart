@@ -5,6 +5,7 @@ import 'collections_page.dart';
 import 'statistics_page.dart';
 import 'recommendations_page.dart'; // Add the recommendations page
 import 'settings_page.dart'; // или используй /settings через маршруты
+import '../l10n/app_localizations.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -49,18 +50,27 @@ class _MainNavigationState extends State<MainNavigation> {
             };
           });
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: AppLocalizations.of(context)!.home,
+          ),
           NavigationDestination(
             icon: Icon(Icons.collections),
-            label: 'Collections',
+            label: AppLocalizations.of(context)!.collections,
           ),
           NavigationDestination(
             icon: Icon(Icons.auto_awesome),
-            label: 'Recommend',
+            label: AppLocalizations.of(context)!.recommendations,
           ),
-          NavigationDestination(icon: Icon(Icons.calculate), label: 'Stats'),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+          NavigationDestination(
+            icon: Icon(Icons.calculate),
+            label: AppLocalizations.of(context)!.statistics,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings),
+            label: AppLocalizations.of(context)!.settings,
+          ),
         ],
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       ),

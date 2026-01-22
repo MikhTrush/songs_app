@@ -42,6 +42,26 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
 
+          ListTile(
+            title: Text(AppLocalizations.of(context)!.language_option),
+            trailing: DropdownButton<String>(
+              value: provider.locale.languageCode,
+              items: [
+              ...AppLocalizations.supportedLocales
+                .map(
+                  (locale) => DropdownMenuItem(
+                    value: locale.languageCode,
+                    child: Text(locale.languageCode),
+                  ),
+                )
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<SettingsProvider>().setLocale(value);
+                }
+              },
+            ),
+          ),
           // Размер шрифта
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

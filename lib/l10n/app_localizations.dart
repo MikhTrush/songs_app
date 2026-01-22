@@ -451,6 +451,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default Meeting Type'**
   String get meeting_type_option;
+
+  /// No description provided for @language_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language_option;
 }
 
 class _AppLocalizationsDelegate

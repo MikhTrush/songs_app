@@ -198,4 +198,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meeting_type_option => 'Default Meeting Type';
+
+  @override
+  String get language_option => 'Language';
 }

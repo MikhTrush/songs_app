@@ -66,5 +66,6 @@
     "settings_title": "Settings",
     "theme_option": "Theme",
     "font_size_option": "Font Size",
-    "meeting_type_option": "Default Meeting Type"
+    "meeting_type_option": "Default Meeting Type",
+    "language_option": "Language"
 }

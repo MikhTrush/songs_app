@@ -58,5 +58,6 @@
     "settings_title": "Настройки",
     "theme_option": "Тема",
     "font_size_option": "Размер шрифта",
-    "meeting_type_option": "Тип встречи по умолчанию"
+    "meeting_type_option": "Тип встречи по умолчанию",
+    "language_option": "Язык"
 }
