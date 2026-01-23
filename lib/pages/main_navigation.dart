@@ -52,8 +52,8 @@ class _MainNavigationState extends State<MainNavigation> {
         },
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home),
-            label: AppLocalizations.of(context)!.home,
+            icon: Icon(Icons.search),
+            label: AppLocalizations.of(context)!.search,
           ),
           NavigationDestination(
             icon: Icon(Icons.collections),

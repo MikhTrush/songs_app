@@ -4,6 +4,7 @@ import '../models/collection.dart';
 import '../models/song.dart';
 import 'song_detail_page.dart';
 import '../l10n/app_localizations.dart';
+import 'song_form_page.dart';
 
 class CollectionsPage extends StatefulWidget {
   const CollectionsPage({super.key});
@@ -340,13 +341,14 @@ class _CollectionsPageState extends State<CollectionsPage> {
   }
 
   void _createNewSong(BuildContext context) async {
-    final song = await showDialog<Song>(
-      context: context,
-      builder: (context) => _SongFormDialog(song: null),
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SongFormPage(),
+      ),
     );
 
-    if (song != null) {
-      await SongDatabase.instance.create(song);
+    if (result != null) {
       setState(() {
         _collectionsFuture = _getAllCollectionsWithNoCollection();
       });
@@ -408,12 +410,8 @@ class _CollectionsPageState extends State<CollectionsPage> {
       ),
     );
   }
-
-  void _showSongOptions(
-    BuildContext context,
-    Collection collection,
-    Song song,
-  ) {
+  
+  void _showSongOptions(BuildContext context, Collection collection, Song song) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -425,16 +423,13 @@ class _CollectionsPageState extends State<CollectionsPage> {
                 title: Text(AppLocalizations.of(context)!.edit_song),
                 onTap: () {
                   Navigator.pop(context);
-                  _editSong(context, song);
+                  _navigateToEditSong(context, song);
                 },
               ),
-              if (collection.id !=
-                  -1) // Only show if song is in a real collection
+              if (collection.id != -1) // Only show if song is in a real collection
                 ListTile(
                   leading: Icon(Icons.link_off),
-                  title: Text(
-                    AppLocalizations.of(context)!.remove_from_collection,
-                  ),
+                  title: Text(AppLocalizations.of(context)!.remove_from_collection),
                   onTap: () {
                     Navigator.pop(context);
                     _removeSongFromCollection(context, collection, song);
@@ -454,15 +449,31 @@ class _CollectionsPageState extends State<CollectionsPage> {
       },
     );
   }
-
-  void _editSong(BuildContext context, Song song) async {
-    final updatedSong = await showDialog<Song>(
-      context: context,
-      builder: (context) => _SongFormDialog(song: song),
+  
+  void _navigateToEditSong(BuildContext context, Song song) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SongFormPage(song: song),
+      ),
     );
 
+    if (result != null) {
+      setState(() {
+        _collectionsFuture = _getAllCollectionsWithNoCollection();
+      });
+    }
+  }
+  
+  void _editSong(BuildContext context, Song song) async {
+    final updatedSong = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SongFormPage(song: song),
+      ),
+    );
+    
     if (updatedSong != null) {
-      await SongDatabase.instance.updateSong(updatedSong);
       setState(() {
         _collectionsFuture = _getAllCollectionsWithNoCollection();
       });
@@ -675,155 +686,6 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    super.dispose();
-  }
-}
-
-class _SongFormDialog extends StatefulWidget {
-  final Song? song;
-
-  const _SongFormDialog({this.song});
-
-  @override
-  State<_SongFormDialog> createState() => _SongFormDialogState();
-}
-
-class _SongFormDialogState extends State<_SongFormDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _versesController = TextEditingController();
-  final _categoriesController = TextEditingController();
-  final _tagsController = TextEditingController();
-  final _themesController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.song != null) {
-      _titleController.text = widget.song!.title;
-      _versesController.text = widget.song!.verses.join('\n\n');
-      _categoriesController.text = widget.song!.categories.join(',');
-      _tagsController.text = widget.song!.tags.join(',');
-      _themesController.text = widget.song!.themes.join(',');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        widget.song != null
-            ? AppLocalizations.of(context)!.edit_song
-            : AppLocalizations.of(context)!.create_song,
-      ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.title,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.please_enter_title;
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _versesController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.verses,
-                  ),
-                  maxLines: 6,
-                ),
-                TextFormField(
-                  controller: _categoriesController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.categories,
-                  ),
-                ),
-                TextFormField(
-                  controller: _tagsController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.tags,
-                  ),
-                ),
-                TextFormField(
-                  controller: _themesController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.themes,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState?.validate() == true) {
-              final verses = _versesController.text
-                  .split('\n\n')
-                  .where((v) => v.trim().isNotEmpty)
-                  .toList();
-              final categories = _categoriesController.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              final tags = _tagsController.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              final themes = _themesController.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-
-              final song = Song(
-                id: widget.song?.id ?? 0, // Will be ignored for new songs
-                title: _titleController.text,
-                verses: verses,
-                categories: categories,
-                tags: tags,
-                themes: themes,
-              );
-              Navigator.pop(context, song);
-            }
-          },
-          child: Text(
-            widget.song != null
-                ? AppLocalizations.of(context)!.update
-                : AppLocalizations.of(context)!.create,
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _versesController.dispose();
-    _categoriesController.dispose();
-    _tagsController.dispose();
-    _themesController.dispose();
     super.dispose();
   }
 }
