@@ -299,4 +299,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get please_enter_title => 'Please enter a title';
+
+  @override
+  String get recently_used_songs => 'Recently Used Songs';
+
+  @override
+  String get recently_used_list_desc =>
+      'List of songs used in the last sessions';
 }

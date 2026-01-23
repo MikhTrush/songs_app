@@ -512,4 +512,18 @@ Future<void> insertInitialData() async {
       whereArgs: [collectionId, songId],
     );
   }
+
+  // Get recently used songs with their usage details
+  Future<List<Map<String, dynamic>>> getRecentlyUsedSongs({int limit = 10}) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT s.*, u.used_at, u.meeting_type
+      FROM song_usage u
+      JOIN songs s ON u.song_id = s.id
+      ORDER BY u.used_at DESC
+      LIMIT ?
+    ''', [limit]);
+
+    return maps;
+  }
 }

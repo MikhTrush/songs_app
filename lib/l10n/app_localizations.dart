@@ -640,6 +640,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a title'**
   String get please_enter_title;
+
+  /// No description provided for @recently_used_songs.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Used Songs'**
+  String get recently_used_songs;
+
+  /// No description provided for @recently_used_list_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'List of songs used in the last sessions'**
+  String get recently_used_list_desc;
 }
 
 class _AppLocalizationsDelegate

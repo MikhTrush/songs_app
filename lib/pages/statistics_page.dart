@@ -80,6 +80,16 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 ),
                 const SizedBox(height: 12),
                 _buildMeetingTypesChart(),
+                
+                const SizedBox(height: 24),
+
+                // Recently Used Songs
+                Text(
+                  AppLocalizations.of(context)!.recently_used_songs,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                _buildRecentlyUsedSongsList(),
               ],
             ),
           ),
@@ -428,6 +438,72 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 ),
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRecentlyUsedSongsList() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: SongDatabase.instance.getRecentlyUsedSongs(limit: 10),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        final recentlyUsedSongs = snapshot.data ?? [];
+
+        if (recentlyUsedSongs.isEmpty) {
+          return Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                AppLocalizations.of(
+                  context,
+                )!.no_collections_yet, // Reusing this text since it's similar
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          );
+        }
+
+        return Card(
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: recentlyUsedSongs.length,
+            itemBuilder: (context, index) {
+              final song = recentlyUsedSongs[index];
+              final usedAt = DateTime.parse(song['used_at']);
+              final formattedDate = '${usedAt.day}.${usedAt.month}.${usedAt.year}';
+              
+              return ListTile(
+                title: Text(song['title']),
+                subtitle: Text('${AppLocalizations.of(context)!.songs_spoken(formattedDate)} (${song['meeting_type']})'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () async {
+                  // Find the actual song object by title
+                  final allSongs = await SongDatabase.instance.getAllSongs();
+                  final songObj = allSongs.firstWhere(
+                    (s) => s.title == song['title'],
+                    orElse: () => allSongs.first,
+                  );
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SongDetailPage(song: songObj),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         );
       },

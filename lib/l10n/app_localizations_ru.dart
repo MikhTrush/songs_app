@@ -299,4 +299,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get please_enter_title => 'Пожалуйста, введите название';
+
+  @override
+  String get recently_used_songs => 'Недавно использованные песни';
+
+  @override
+  String get recently_used_list_desc =>
+      'Список песен, использованных на последних сессиях';
 }

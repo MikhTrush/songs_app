@@ -88,5 +88,7 @@
   "categories": "Categories",
   "tags": "Tags",
   "themes": "Themes",
-  "please_enter_title": "Please enter a title"
+  "please_enter_title": "Please enter a title",
+  "recently_used_songs": "Recently Used Songs",
+  "recently_used_list_desc": "List of songs used in the last sessions"
 }
