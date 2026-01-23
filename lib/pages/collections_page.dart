@@ -18,7 +18,26 @@ class _CollectionsPageState extends State<CollectionsPage> {
   @override
   void initState() {
     super.initState();
-    _collectionsFuture = SongDatabase.instance.getAllCollections();
+    _collectionsFuture = _getAllCollectionsWithNoCollection();
+  }
+
+  // Method to get all collections including the special "NoCollection"
+  Future<List<Collection>> _getAllCollectionsWithNoCollection() async {
+    final allCollections = await SongDatabase.instance.getAllCollections();
+    final songsWithoutCollection = await SongDatabase.instance
+        .getSongsWithoutCollection();
+
+    // Create a special collection for songs without collection
+    final noCollection = Collection(
+      id: -1, // Special ID for NoCollection
+      name: AppLocalizations.of(context)!.no_collection,
+      description: AppLocalizations.of(context)!.no_collection_desc,
+      songIds: songsWithoutCollection.map((song) => song.id).toList(),
+    );
+
+    // Add the NoCollection to the beginning of the list
+    allCollections.insert(0, noCollection);
+    return allCollections;
   }
 
   @override
@@ -77,9 +96,12 @@ class _CollectionsPageState extends State<CollectionsPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (collection.description.isNotEmpty)
-                              Text(
-                                collection.description,
-                                style: Theme.of(context).textTheme.bodySmall,
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Text(
+                                  collection.description,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
                               ),
                             const SizedBox(height: 8),
                             FutureBuilder<List<Song>>(
@@ -114,8 +136,92 @@ class _CollectionsPageState extends State<CollectionsPage> {
                                   children: songs
                                       .map(
                                         (song) => ListTile(
-                                          title: Text(song.title),
+                                          contentPadding: EdgeInsets.all(0),
+                                          title: Text(
+                                            song.title,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge,
+                                          ),
                                           dense: true,
+                                          trailing: PopupMenuButton(
+                                            icon: Icon(Icons.more_vert),
+                                            onSelected: (value) {
+                                              switch (value) {
+                                                case 'edit':
+                                                  _editSong(context, song);
+                                                  break;
+                                                case 'remove':
+                                                  if (collection.id != -1) {
+                                                    _removeSongFromCollection(
+                                                      context,
+                                                      collection,
+                                                      song,
+                                                    );
+                                                  }
+                                                  break;
+                                                case 'delete':
+                                                  _deleteSong(
+                                                    context,
+                                                    song,
+                                                    collection,
+                                                  );
+                                                  break;
+                                              }
+                                            },
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem(
+                                                value: 'edit',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.edit, size: 20),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      AppLocalizations.of(
+                                                        context,
+                                                      )!.edit_song,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              if (collection.id !=
+                                                  -1) // Only show remove option if not in NoCollection
+                                                PopupMenuItem(
+                                                  value: 'remove',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.link_off,
+                                                        size: 20,
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        AppLocalizations.of(
+                                                          context,
+                                                        )!.remove_from_collection,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete,
+                                                      size: 20,
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      AppLocalizations.of(
+                                                        context,
+                                                      )!.delete_song,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                           onTap: () {
                                             Navigator.push(
                                               context,
@@ -132,35 +238,39 @@ class _CollectionsPageState extends State<CollectionsPage> {
                               },
                             ),
                             const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    icon: const Icon(Icons.edit),
-                                    label: Text(
-                                      AppLocalizations.of(context)!.edit,
-                                    ),
-                                    onPressed: () =>
-                                        _editCollection(context, collection),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    icon: const Icon(Icons.delete),
-                                    label: Text(
-                                      AppLocalizations.of(context)!.delete,
-                                    ),
-                                    onPressed: () =>
-                                        _deleteCollection(context, collection),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      foregroundColor: Colors.white,
+                            if (collection.id !=
+                                -1) // Don't show edit/delete buttons for NoCollection
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      icon: const Icon(Icons.edit),
+                                      label: Text(
+                                        AppLocalizations.of(context)!.edit,
+                                      ),
+                                      onPressed: () =>
+                                          _editCollection(context, collection),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      icon: const Icon(Icons.delete),
+                                      label: Text(
+                                        AppLocalizations.of(context)!.delete,
+                                      ),
+                                      onPressed: () => _deleteCollection(
+                                        context,
+                                        collection,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
@@ -173,13 +283,18 @@ class _CollectionsPageState extends State<CollectionsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _createNewCollection(context),
+        onPressed: () => _showMainActionDialog(context),
         child: Icon(Icons.add),
       ),
     );
   }
 
   Future<List<Song>> _getSongsForCollection(Collection collection) async {
+    if (collection.id == -1) {
+      // NoCollection
+      return await SongDatabase.instance.getSongsWithoutCollection();
+    }
+
     if (collection.songIds.isEmpty) {
       return [];
     }
@@ -194,6 +309,50 @@ class _CollectionsPageState extends State<CollectionsPage> {
     return maps.map((map) => Song.fromMap(map)).toList();
   }
 
+  void _showMainActionDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.create_new_folder),
+                title: Text(AppLocalizations.of(context)!.create_collection),
+                onTap: () {
+                  Navigator.pop(context);
+                  _createNewCollection(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.music_note),
+                title: Text(AppLocalizations.of(context)!.add_song),
+                onTap: () {
+                  Navigator.pop(context);
+                  _createNewSong(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _createNewSong(BuildContext context) async {
+    final song = await showDialog<Song>(
+      context: context,
+      builder: (context) => _SongFormDialog(song: null),
+    );
+
+    if (song != null) {
+      await SongDatabase.instance.create(song);
+      setState(() {
+        _collectionsFuture = _getAllCollectionsWithNoCollection();
+      });
+    }
+  }
+
   void _createNewCollection(BuildContext context) async {
     final Collection? newCollection = await showDialog<Collection>(
       context: context,
@@ -203,7 +362,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
     if (newCollection != null) {
       await SongDatabase.instance.createCollection(newCollection);
       setState(() {
-        _collectionsFuture = SongDatabase.instance.getAllCollections();
+        _collectionsFuture = _getAllCollectionsWithNoCollection();
       });
     }
   }
@@ -217,7 +376,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
     if (updatedCollection != null) {
       await SongDatabase.instance.updateCollection(updatedCollection);
       setState(() {
-        _collectionsFuture = SongDatabase.instance.getAllCollections();
+        _collectionsFuture = _getAllCollectionsWithNoCollection();
       });
     }
   }
@@ -240,7 +399,132 @@ class _CollectionsPageState extends State<CollectionsPage> {
               Navigator.pop(context);
               await SongDatabase.instance.deleteCollection(collection.id);
               setState(() {
-                _collectionsFuture = SongDatabase.instance.getAllCollections();
+                _collectionsFuture = _getAllCollectionsWithNoCollection();
+              });
+            },
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSongOptions(
+    BuildContext context,
+    Collection collection,
+    Song song,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.edit),
+                title: Text(AppLocalizations.of(context)!.edit_song),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editSong(context, song);
+                },
+              ),
+              if (collection.id !=
+                  -1) // Only show if song is in a real collection
+                ListTile(
+                  leading: Icon(Icons.link_off),
+                  title: Text(
+                    AppLocalizations.of(context)!.remove_from_collection,
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _removeSongFromCollection(context, collection, song);
+                  },
+                ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text(AppLocalizations.of(context)!.delete_song),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteSong(context, song, collection);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _editSong(BuildContext context, Song song) async {
+    final updatedSong = await showDialog<Song>(
+      context: context,
+      builder: (context) => _SongFormDialog(song: song),
+    );
+
+    if (updatedSong != null) {
+      await SongDatabase.instance.updateSong(updatedSong);
+      setState(() {
+        _collectionsFuture = _getAllCollectionsWithNoCollection();
+      });
+    }
+  }
+
+  void _removeSongFromCollection(
+    BuildContext context,
+    Collection collection,
+    Song song,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.confirm_remove),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.confirm_remove_from_collection(song.title, collection.name),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await SongDatabase.instance.removeSongFromCollectionOnly(
+                song.id,
+                collection.id,
+              );
+              setState(() {
+                _collectionsFuture = _getAllCollectionsWithNoCollection();
+              });
+            },
+            child: Text(AppLocalizations.of(context)!.remove),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteSong(BuildContext context, Song song, Collection collection) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.confirm_delete),
+        content: Text(
+          AppLocalizations.of(context)!.confirm_delete_song(song.title),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await SongDatabase.instance.deleteSong(song.id);
+              setState(() {
+                _collectionsFuture = _getAllCollectionsWithNoCollection();
               });
             },
             child: Text(AppLocalizations.of(context)!.delete),
@@ -391,6 +675,155 @@ class _CollectionFormDialogState extends State<_CollectionFormDialog> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    super.dispose();
+  }
+}
+
+class _SongFormDialog extends StatefulWidget {
+  final Song? song;
+
+  const _SongFormDialog({this.song});
+
+  @override
+  State<_SongFormDialog> createState() => _SongFormDialogState();
+}
+
+class _SongFormDialogState extends State<_SongFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _versesController = TextEditingController();
+  final _categoriesController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _themesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.song != null) {
+      _titleController.text = widget.song!.title;
+      _versesController.text = widget.song!.verses.join('\n\n');
+      _categoriesController.text = widget.song!.categories.join(',');
+      _tagsController.text = widget.song!.tags.join(',');
+      _themesController.text = widget.song!.themes.join(',');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.song != null
+            ? AppLocalizations.of(context)!.edit_song
+            : AppLocalizations.of(context)!.create_song,
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.title,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(context)!.please_enter_title;
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _versesController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.verses,
+                  ),
+                  maxLines: 6,
+                ),
+                TextFormField(
+                  controller: _categoriesController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.categories,
+                  ),
+                ),
+                TextFormField(
+                  controller: _tagsController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.tags,
+                  ),
+                ),
+                TextFormField(
+                  controller: _themesController,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.themes,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context)!.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            if (_formKey.currentState?.validate() == true) {
+              final verses = _versesController.text
+                  .split('\n\n')
+                  .where((v) => v.trim().isNotEmpty)
+                  .toList();
+              final categories = _categoriesController.text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+              final tags = _tagsController.text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+              final themes = _themesController.text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+
+              final song = Song(
+                id: widget.song?.id ?? 0, // Will be ignored for new songs
+                title: _titleController.text,
+                verses: verses,
+                categories: categories,
+                tags: tags,
+                themes: themes,
+              );
+              Navigator.pop(context, song);
+            }
+          },
+          child: Text(
+            widget.song != null
+                ? AppLocalizations.of(context)!.update
+                : AppLocalizations.of(context)!.create,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _versesController.dispose();
+    _categoriesController.dispose();
+    _tagsController.dispose();
+    _themesController.dispose();
     super.dispose();
   }
 }

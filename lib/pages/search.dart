@@ -302,11 +302,6 @@ class _SearchPageState extends State<SearchPage> {
       title: Text(AppLocalizations.of(context)!.songs_app_title),
       elevation: 0,
       centerTitle: true,
-      leading: Container(
-        margin: EdgeInsets.all(10),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-        child: Icon(Icons.menu, color: Theme.of(context).iconTheme.color),
-      ),
       actions: [
         Container(
           margin: EdgeInsets.all(10),

@@ -221,14 +221,82 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manage_meeting_types => 'Управление типами встреч';
 
   @override
+  String get enter_meeting_type_hint => 'Введите тип встречи';
+
+  @override
   String get add_meeting_type => 'Добавить тип встречи';
 
   @override
-  String get enter_meeting_type_hint => 'Введите тип встречи';
+  String get add => 'Добавить';
 
   @override
   String get save => 'Сохранить';
 
   @override
-  String get add => 'Добавить';
+  String get remove_meeting_type => 'Удалить тип встречи?';
+
+  @override
+  String get yes => 'Да';
+
+  @override
+  String get no => 'Нет';
+
+  @override
+  String get no_collection => 'Песни без коллекции';
+
+  @override
+  String get no_collection_desc =>
+      'Все песни, которые не являются частью какой-либо коллекции';
+
+  @override
+  String get edit_song => 'Редактировать песню';
+
+  @override
+  String get delete_song => 'Удалить песню';
+
+  @override
+  String get remove_from_collection => 'Удалить из коллекции';
+
+  @override
+  String get confirm_remove => 'Подтвердить удаление';
+
+  @override
+  String confirm_remove_from_collection(
+    Object collectionName,
+    Object songTitle,
+  ) {
+    return 'Удалить \"$songTitle\" из \"$collectionName\"?';
+  }
+
+  @override
+  String confirm_delete_song(Object songTitle) {
+    return 'Вы уверены, что хотите удалить \"$songTitle\"?';
+  }
+
+  @override
+  String get remove => 'Удалить';
+
+  @override
+  String get add_song => 'Добавить новую песню';
+
+  @override
+  String get create_song => 'Создать песню';
+
+  @override
+  String get title => 'Название';
+
+  @override
+  String get verses => 'Куплеты';
+
+  @override
+  String get categories => 'Категории';
+
+  @override
+  String get tags => 'Теги';
+
+  @override
+  String get themes => 'Темы';
+
+  @override
+  String get please_enter_title => 'Пожалуйста, введите название';
 }

@@ -221,14 +221,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manage_meeting_types => 'Manage Meeting Types';
 
   @override
+  String get enter_meeting_type_hint => 'Enter meeting type';
+
+  @override
   String get add_meeting_type => 'Add Meeting Type';
 
   @override
-  String get enter_meeting_type_hint => 'Enter meeting type';
+  String get add => 'Add';
 
   @override
   String get save => 'Save';
 
   @override
-  String get add => 'Add';
+  String get remove_meeting_type => 'Remove meeting type?';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get no_collection => 'Songs without collection';
+
+  @override
+  String get no_collection_desc =>
+      'All songs that are not part of any collection';
+
+  @override
+  String get edit_song => 'Edit Song';
+
+  @override
+  String get delete_song => 'Delete Song';
+
+  @override
+  String get remove_from_collection => 'Remove from Collection';
+
+  @override
+  String get confirm_remove => 'Confirm Remove';
+
+  @override
+  String confirm_remove_from_collection(
+    Object collectionName,
+    Object songTitle,
+  ) {
+    return 'Remove \"$songTitle\" from \"$collectionName\"?';
+  }
+
+  @override
+  String confirm_delete_song(Object songTitle) {
+    return 'Are you sure you want to delete \"$songTitle\"?';
+  }
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get add_song => 'Add New Song';
+
+  @override
+  String get create_song => 'Create Song';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get verses => 'Verses';
+
+  @override
+  String get categories => 'Categories';
+
+  @override
+  String get tags => 'Tags';
+
+  @override
+  String get themes => 'Themes';
+
+  @override
+  String get please_enter_title => 'Please enter a title';
 }

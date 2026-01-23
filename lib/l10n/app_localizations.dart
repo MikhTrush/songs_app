@@ -98,13 +98,13 @@ abstract class AppLocalizations {
     Locale('ru'),
   ];
 
-  /// The conventional newborn programmer greeting
+  /// No description provided for @helloWorld.
   ///
   /// In en, this message translates to:
   /// **'Hello, world!'**
   String get helloWorld;
 
-  /// Search
+  /// No description provided for @search.
   ///
   /// In en, this message translates to:
   /// **'Search'**
@@ -494,17 +494,23 @@ abstract class AppLocalizations {
   /// **'Manage Meeting Types'**
   String get manage_meeting_types;
 
+  /// No description provided for @enter_meeting_type_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter meeting type'**
+  String get enter_meeting_type_hint;
+
   /// No description provided for @add_meeting_type.
   ///
   /// In en, this message translates to:
   /// **'Add Meeting Type'**
   String get add_meeting_type;
 
-  /// No description provided for @enter_meeting_type_hint.
+  /// No description provided for @add.
   ///
   /// In en, this message translates to:
-  /// **'Enter meeting type'**
-  String get enter_meeting_type_hint;
+  /// **'Add'**
+  String get add;
 
   /// No description provided for @save.
   ///
@@ -512,11 +518,128 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get save;
 
-  /// No description provided for @add.
+  /// No description provided for @remove_meeting_type.
   ///
   /// In en, this message translates to:
-  /// **'Add'**
-  String get add;
+  /// **'Remove meeting type?'**
+  String get remove_meeting_type;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @no_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs without collection'**
+  String get no_collection;
+
+  /// No description provided for @no_collection_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'All songs that are not part of any collection'**
+  String get no_collection_desc;
+
+  /// No description provided for @edit_song.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Song'**
+  String get edit_song;
+
+  /// No description provided for @delete_song.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Song'**
+  String get delete_song;
+
+  /// No description provided for @remove_from_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Collection'**
+  String get remove_from_collection;
+
+  /// No description provided for @confirm_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Remove'**
+  String get confirm_remove;
+
+  /// No description provided for @confirm_remove_from_collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{songTitle}\" from \"{collectionName}\"?'**
+  String confirm_remove_from_collection(
+    Object collectionName,
+    Object songTitle,
+  );
+
+  /// No description provided for @confirm_delete_song.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{songTitle}\"?'**
+  String confirm_delete_song(Object songTitle);
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @add_song.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Song'**
+  String get add_song;
+
+  /// No description provided for @create_song.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Song'**
+  String get create_song;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @verses.
+  ///
+  /// In en, this message translates to:
+  /// **'Verses'**
+  String get verses;
+
+  /// No description provided for @categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categories;
+
+  /// No description provided for @tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get tags;
+
+  /// No description provided for @themes.
+  ///
+  /// In en, this message translates to:
+  /// **'Themes'**
+  String get themes;
+
+  /// No description provided for @please_enter_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get please_enter_title;
 }
 
 class _AppLocalizationsDelegate

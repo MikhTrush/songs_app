@@ -460,4 +460,56 @@ Future<void> insertInitialData() async {
     final List<Map<String, dynamic>> maps = await db.query('songs');
     return maps.map((map) => Song.fromMap(map)).toList();
   }
+
+  // Get songs that are not in any collection
+  Future<List<Song>> getSongsWithoutCollection() async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT s.* FROM songs s
+      LEFT JOIN collection_songs cs ON s.id = cs.song_id
+      WHERE cs.song_id IS NULL
+    ''');
+    return maps.map((map) => Song.fromMap(map)).toList();
+  }
+
+  // Update an existing song
+  Future<void> updateSong(Song song) async {
+    final db = await instance.database;
+    await db.update(
+      'songs',
+      song.toMap()..remove('id'),
+      where: 'id = ?',
+      whereArgs: [song.id],
+    );
+  }
+
+  // Delete a song completely (removes from all collections and deletes the song)
+  Future<void> deleteSong(int songId) async {
+    final db = await instance.database;
+    
+    // Remove the song from all collections
+    await db.delete(
+      'collection_songs',
+      where: 'song_id = ?',
+      whereArgs: [songId],
+    );
+    
+    // Delete the song itself
+    await db.delete(
+      'songs',
+      where: 'id = ?',
+      whereArgs: [songId],
+    );
+  }
+
+  // Remove a song from a specific collection but keep the song
+  Future<void> removeSongFromCollectionOnly(int songId, int collectionId) async {
+    final db = await instance.database;
+    
+    await db.delete(
+      'collection_songs',
+      where: 'collection_id = ? AND song_id = ?',
+      whereArgs: [collectionId, songId],
+    );
+  }
 }
