@@ -106,6 +106,19 @@ class SongDatabase {
     return maps.map((e) => Song.fromMap(e)).toList();
   }
 
+  Future<List<Song>> searchOnlyText(String query) async {
+    if (query.isEmpty) return [];
+
+    final db = await instance.database;
+    final maps = await db.query(
+      'songs',
+      where: 'title LIKE ? OR verses LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
+    );
+
+    return maps.map((e) => Song.fromMap(e)).toList();
+  }
+
   // Для заполнения при первом запуске
 Future<void> insertInitialData() async {
   final db = await instance.database;

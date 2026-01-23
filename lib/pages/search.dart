@@ -55,7 +55,7 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     setState(() => _isLoading = true);
-    final results = await SongDatabase.instance.search(query);
+    final results = await SongDatabase.instance.searchOnlyText(query);
     setState(() {
       _searchResults = results;
       _isLoading = false;
@@ -67,7 +67,11 @@ class _SearchPageState extends State<SearchPage> {
   String _currentQuery = '';
 
   // Add this helper method to highlight matches
-  Widget _buildHighlightedText(String fullText, String searchTerm, {bool isTitle = false}) {
+  Widget _buildHighlightedText(
+    String fullText,
+    String searchTerm, {
+    bool isTitle = false,
+  }) {
     if (searchTerm.isEmpty) {
       return Text(
         fullText,
@@ -77,15 +81,15 @@ class _SearchPageState extends State<SearchPage> {
 
     final lowerFullText = fullText.toLowerCase();
     final lowerSearchTerm = searchTerm.toLowerCase();
-    
+
     // Use case-insensitive search to find all matches
     final matches = <(int start, int end)>[]; // Store match positions
     int searchStart = 0;
-    
+
     while (searchStart <= lowerFullText.length - lowerSearchTerm.length) {
       final matchIndex = lowerFullText.indexOf(lowerSearchTerm, searchStart);
       if (matchIndex == -1) break;
-      
+
       matches.add((matchIndex, matchIndex + lowerSearchTerm.length));
       searchStart = matchIndex + 1; // Move by 1 to catch overlapping matches
     }
@@ -106,7 +110,7 @@ class _SearchPageState extends State<SearchPage> {
       if (currentPosition < start) {
         spans.add(TextSpan(text: fullText.substring(currentPosition, start)));
       }
-      
+
       // Add highlighted match
       spans.add(
         TextSpan(
@@ -117,7 +121,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       );
-      
+
       currentPosition = end;
     }
 
@@ -128,7 +132,9 @@ class _SearchPageState extends State<SearchPage> {
 
     return RichText(
       text: TextSpan(
-        style: isTitle ? Theme.of(context).textTheme.titleLarge : DefaultTextStyle.of(context).style,
+        style: isTitle
+            ? Theme.of(context).textTheme.titleLarge
+            : DefaultTextStyle.of(context).style,
         children: spans,
       ),
     );
@@ -137,15 +143,15 @@ class _SearchPageState extends State<SearchPage> {
   // Helper function to find the first verse containing the search term
   String _findVerseWithMatch(Song song, String searchTerm) {
     if (searchTerm.isEmpty) return song.verses.isNotEmpty ? song.verses[0] : '';
-    
+
     final lowerSearchTerm = searchTerm.toLowerCase();
-    
+
     for (String verse in song.verses) {
       if (verse.toLowerCase().contains(lowerSearchTerm)) {
         return _trimVerseToLines(verse, 3);
       }
     }
-    
+
     // Fallback to first verse if no match found
     return song.verses.isNotEmpty ? _trimVerseToLines(song.verses[0], 3) : '';
   }
@@ -153,33 +159,33 @@ class _SearchPageState extends State<SearchPage> {
   // Helper function to trim a verse to a specific number of lines
   String _trimVerseToLines(String verse, int maxLines) {
     if (maxLines <= 0) return '';
-    
+
     // Split the verse into lines
     List<String> lines = verse.split('\n');
-    
+
     // If we have fewer lines than the max, return as is
     if (lines.length <= maxLines) {
       return verse;
     }
-    
+
     // Calculate which lines to show based on the middle of the content
     int startIndex = (lines.length - maxLines) ~/ 2;
     int endIndex = startIndex + maxLines;
-    
+
     // Create the trimmed result with ellipses if needed
     List<String> selectedLines = lines.sublist(startIndex, endIndex);
     String result = selectedLines.join('\n');
-    
+
     // Add ellipses at the beginning if we skipped lines at the start
     if (startIndex > 0) {
       result = '...\n$result';
     }
-    
+
     // Add ellipses at the end if we skipped lines at the end
     if (endIndex < lines.length) {
       result = '$result\n...';
     }
-    
+
     return result;
   }
 
@@ -202,67 +208,75 @@ class _SearchPageState extends State<SearchPage> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final song = _searchResults[index];
-                
+
                 // Check if the title contains the search term
-                final titleContainsMatch = _currentQuery.isEmpty || 
-                    song.title.toLowerCase().contains(_currentQuery.toLowerCase());
-                
+                final titleContainsMatch =
+                    _currentQuery.isEmpty ||
+                    song.title.toLowerCase().contains(
+                      _currentQuery.toLowerCase(),
+                    );
+
                 // Get the verse to display based on whether title contains match
                 final verseToDisplay = _findVerseWithMatch(song, _currentQuery);
 
                 return ListTile(
-                  title: _buildHighlightedText(song.title, _currentQuery, isTitle: true),
+                  title: _buildHighlightedText(
+                    song.title,
+                    _currentQuery,
+                    isTitle: true,
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHighlightedText(verseToDisplay, _currentQuery),
                       if (song.categories.isNotEmpty)
-                        Wrap(
-                          spacing: 4,
-                          children: song.categories
-                              .take(3)
-                              .map(
-                                (cat) => Chip(
-                                  label: Text(
-                                    cat,
-                                    style: const TextStyle(fontSize: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, bottom: 2),
+                          child: Wrap(
+                            spacing: 4,
+                            children: song.categories
+                                .take(3)
+                                .map(
+                                  (cat) => TagChip(
+                                    cat: cat,
+                                    color: Colors.blue.withAlpha(40),
                                   ),
-                                  backgroundColor: Colors.blue.withAlpha(40),
-                                ),
-                              )
-                              .toList(),
+                                )
+                                .toList(),
+                          ),
                         ),
                       if (song.tags.isNotEmpty)
-                        Wrap(
-                          spacing: 4,
-                          children: song.tags
-                              .take(3)
-                              .map(
-                                (tag) => Chip(
-                                  label: Text(
-                                    tag,
-                                    style: const TextStyle(fontSize: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, bottom: 2),
+                          child: Wrap(
+                            spacing: 4,
+                            children: song.tags
+                                .take(3)
+                                .map(
+                                  (tag) => TagChip(
+                                    cat: tag,
+                                    color: Colors.green.withAlpha(40),
                                   ),
-                                  backgroundColor: Colors.green.withAlpha(40),
-                                ),
-                              )
-                              .toList(),
+                                )
+                                .toList(),
+                          ),
                         ),
                       if (song.themes.isNotEmpty)
-                        Wrap(
-                          spacing: 4,
-                          children: song.themes
-                              .take(3)
-                              .map(
-                                (theme) => Chip(
-                                  label: Text(
-                                    theme,
-                                    style: const TextStyle(fontSize: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, bottom: 2),
+                          child: Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: song.themes
+                                .take(3)
+                                .map(
+                                  (theme) => TagChip(
+                                    cat: theme,
+                                    color: Colors.orange.withAlpha(40),
                                   ),
-                                  backgroundColor: Colors.orange.withAlpha(40),
-                                ),
-                              )
-                              .toList(),
+                                )
+                                .toList(),
+                          ),
                         ),
                     ],
                   ),
@@ -474,6 +488,27 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       text = controller.text.toLowerCase();
     });
+  }
+}
+
+class TagChip extends StatelessWidget {
+  const TagChip({super.key, required this.cat, this.color = Colors.blue});
+
+  final Color color;
+  final String cat;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.all(Radius.circular(3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+        child: Text(cat),
+      ),
+    );
   }
 }
 
