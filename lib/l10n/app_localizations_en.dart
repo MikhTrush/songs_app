@@ -306,4 +306,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recently_used_list_desc =>
       'List of songs used in the last sessions';
+
+  @override
+  String get no_data_available => 'No data available';
+
+  @override
+  String get see_all => 'See All';
 }

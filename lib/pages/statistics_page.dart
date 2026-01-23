@@ -4,6 +4,8 @@ import '../db/song_database.dart';
 import '../models/song.dart';
 import 'song_detail_page.dart';
 import '../l10n/app_localizations.dart';
+import 'top_songs_list_page.dart';  // New import
+import 'recently_used_songs_list_page.dart';  // New import
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -59,8 +61,17 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                _buildTopSongsList(),
+                _buildTopSongsNavigationCard(),
 
+                const SizedBox(height: 24),
+
+                // Recently Used Songs
+                Text(
+                  AppLocalizations.of(context)!.recently_used_songs,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                _buildRecentlyUsedSongsNavigationCard(),
                 const SizedBox(height: 24),
 
                 // Usage Chart
@@ -81,15 +92,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 const SizedBox(height: 12),
                 _buildMeetingTypesChart(),
                 
-                const SizedBox(height: 24),
-
-                // Recently Used Songs
-                Text(
-                  AppLocalizations.of(context)!.recently_used_songs,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildRecentlyUsedSongsList(),
               ],
             ),
           ),
@@ -179,81 +181,184 @@ class _StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  Widget _buildTopSongsList() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _usageDataFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  // Navigation card for Top Songs
+  Widget _buildTopSongsNavigationCard() {
+    return Card(
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _usageDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              heightFactor: 2,
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
 
-        final usageData = snapshot.data ?? [];
+          final usageData = snapshot.data ?? [];
 
-        // Count usages per song
-        Map<String, int> songUsageCounts = {};
-        for (var record in usageData) {
-          String title = record['title'].toString();
-          songUsageCounts[title] = (songUsageCounts[title] ?? 0) + 1;
-        }
+          // Count usages per song
+          Map<String, int> songUsageCounts = {};
+          for (var record in usageData) {
+            String title = record['title'].toString();
+            songUsageCounts[title] = (songUsageCounts[title] ?? 0) + 1;
+          }
 
-        // Sort by usage count descending
-        var sortedEntries = songUsageCounts.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+          // Sort by usage count descending
+          var sortedEntries = songUsageCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
 
-        // Get top 10 songs
-        var topSongs = sortedEntries.take(10).toList();
+          // Get top 3 songs to show as preview
+          var topSongsPreview = sortedEntries.take(3).toList();
 
-        if (topSongs.isEmpty) {
-          return Card(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                )!.no_collections_yet, // Reusing this text since it's similar
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          );
-        }
-
-        return Card(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: topSongs.length,
-            itemBuilder: (context, index) {
-              final entry = topSongs[index];
-              return ListTile(
-                title: Text(entry.key),
-                subtitle: Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.times_used(entry.value.toString()),
+          return Column(
+            children: [
+              if (topSongsPreview.isNotEmpty)
+                for (int i = 0; i < topSongsPreview.length; i++)
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: Text(
+                        '${i + 1}',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(topSongsPreview[i].key),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.times_used(
+                        topSongsPreview[i].value.toString(),
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                  )
+              else
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.no_data_available,
+                    style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () async {
-                  // Find the actual song object by title
-                  final allSongs = await SongDatabase.instance.getAllSongs();
-                  final song = allSongs.firstWhere(
-                    (s) => s.title == entry.key,
-                    orElse: () => allSongs.first,
-                  );
-
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.see_all,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Theme.of(context).primaryColor,
+                ),
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SongDetailPage(song: song),
+                      builder: (context) => const TopSongsListPage(),
                     ),
                   );
                 },
-              );
-            },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // Navigation card for Recently Used Songs
+  Widget _buildRecentlyUsedSongsNavigationCard() {
+    return Card(
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: SongDatabase.instance.getRecentlyUsedSongs(limit: 3), // Just get 3 for preview
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              heightFactor: 2,
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+
+          final recentlyUsedSongs = snapshot.data ?? [];
+
+          return Column(
+            children: [
+              if (recentlyUsedSongs.isNotEmpty)
+                for (final song in recentlyUsedSongs)
+                  _buildRecentlyUsedSongItem(song)
+              else
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.no_data_available,
+                    style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.see_all,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Theme.of(context).primaryColor,
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RecentlyUsedSongsListPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // Helper method to build individual recently used song items
+  Widget _buildRecentlyUsedSongItem(Map<String, dynamic> song) {
+    final usedAt = DateTime.parse(song['used_at']);
+    final formattedDate = '${usedAt.day}.${usedAt.month}.${usedAt.year}';
+
+    return ListTile(
+      title: Text(song['title']),
+      subtitle: Text('${AppLocalizations.of(context)!.songs_spoken(formattedDate)} (${song['meeting_type']})'),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () async {
+        // Find the actual song object by title
+        final allSongs = await SongDatabase.instance.getAllSongs();
+        final songObj = allSongs.firstWhere(
+          (s) => s.title == song['title'],
+          orElse: () => allSongs.first,
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SongDetailPage(song: songObj),
           ),
         );
       },
@@ -438,72 +543,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecentlyUsedSongsList() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: SongDatabase.instance.getRecentlyUsedSongs(limit: 10),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-
-        final recentlyUsedSongs = snapshot.data ?? [];
-
-        if (recentlyUsedSongs.isEmpty) {
-          return Card(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                AppLocalizations.of(
-                  context,
-                )!.no_collections_yet, // Reusing this text since it's similar
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          );
-        }
-
-        return Card(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: recentlyUsedSongs.length,
-            itemBuilder: (context, index) {
-              final song = recentlyUsedSongs[index];
-              final usedAt = DateTime.parse(song['used_at']);
-              final formattedDate = '${usedAt.day}.${usedAt.month}.${usedAt.year}';
-              
-              return ListTile(
-                title: Text(song['title']),
-                subtitle: Text('${AppLocalizations.of(context)!.songs_spoken(formattedDate)} (${song['meeting_type']})'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () async {
-                  // Find the actual song object by title
-                  final allSongs = await SongDatabase.instance.getAllSongs();
-                  final songObj = allSongs.firstWhere(
-                    (s) => s.title == song['title'],
-                    orElse: () => allSongs.first,
-                  );
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SongDetailPage(song: songObj),
-                    ),
-                  );
-                },
-              );
-            },
           ),
         );
       },

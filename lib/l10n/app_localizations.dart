@@ -652,6 +652,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'List of songs used in the last sessions'**
   String get recently_used_list_desc;
+
+  /// No description provided for @no_data_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get no_data_available;
+
+  /// No description provided for @see_all.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get see_all;
 }
 
 class _AppLocalizationsDelegate

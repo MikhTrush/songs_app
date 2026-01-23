@@ -90,5 +90,7 @@
   "themes": "Themes",
   "please_enter_title": "Please enter a title",
   "recently_used_songs": "Recently Used Songs",
-  "recently_used_list_desc": "List of songs used in the last sessions"
+  "recently_used_list_desc": "List of songs used in the last sessions",
+  "no_data_available": "No data available",
+  "see_all": "See All"
 }

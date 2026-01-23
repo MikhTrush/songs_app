@@ -306,4 +306,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get recently_used_list_desc =>
       'Список песен, использованных на последних сессиях';
+
+  @override
+  String get no_data_available => 'Нет данных';
+
+  @override
+  String get see_all => 'Посмотреть все';
 }
