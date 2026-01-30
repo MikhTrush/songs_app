@@ -51,24 +51,7 @@ class MyApp extends StatelessWidget {
 
         return MaterialApp(
           locale: locale,
-          theme: ThemeData(
-            fontFamily: 'Poppins',
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-            textTheme: TextTheme(
-              displayLarge: TextStyle(
-                fontSize: displayLargeSize,
-                fontWeight: FontWeight.bold,
-              ),
-              titleLarge: TextStyle(
-                fontSize: titleLargeSize,
-                fontWeight: FontWeight.bold,
-              ),
-              bodyMedium: TextStyle(
-                fontSize: bodySize,
-                fontFamily: 'Merryweather',
-              ),
-            ),
-          ),
+          theme: buildTheme(displayLargeSize, titleLargeSize, bodySize),
           darkTheme: ThemeData(
             fontFamily: 'Poppins',
             colorScheme: ColorScheme.fromSeed(
@@ -97,6 +80,27 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+
+  ThemeData buildTheme(double displayLargeSize, double titleLargeSize, double bodySize) {
+    return ThemeData(
+          fontFamily: 'Poppins',
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          textTheme: TextTheme(
+            displayLarge: TextStyle(
+              fontSize: displayLargeSize,
+              fontWeight: FontWeight.bold,
+            ),
+            titleLarge: TextStyle(
+              fontSize: titleLargeSize,
+              fontWeight: FontWeight.bold,
+            ),
+            bodyMedium: TextStyle(
+              fontSize: bodySize,
+              fontFamily: 'Merryweather',
+            ),
+          ),
+        );
   }
 
   ThemeMode _resolveThemeMode(String mode) {

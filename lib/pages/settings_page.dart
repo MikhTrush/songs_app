@@ -18,62 +18,12 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Тема
-          ListTile(
-            title: Text(AppLocalizations.of(context)!.theme_option),
-            trailing: DropdownButton<String>(
-              value: provider.themeMode,
-              items:  [
-                DropdownMenuItem(value: 'system', child: Text(AppLocalizations.of(context)!.system_theme)),
-                DropdownMenuItem(value: 'light', child: Text(AppLocalizations.of(context)!.light_theme)),
-                DropdownMenuItem(value: 'dark', child: Text(AppLocalizations.of(context)!.dark_theme)),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<SettingsProvider>().setThemeMode(value);
-                }
-              },
-            ),
-          ),
+          buildThemeTile(context, provider),
 
-          ListTile(
-            title: Text(AppLocalizations.of(context)!.language_option),
-            trailing: DropdownButton<String>(
-              value: provider.locale.languageCode,
-              items: [
-                ...AppLocalizations.supportedLocales.map(
-                  (locale) => DropdownMenuItem(
-                    value: locale.languageCode,
-                    child: Text(locale.languageCode),
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<SettingsProvider>().setLocale(value);
-                }
-              },
-            ),
-          ),
+          buildLocaleTile(context, provider),
+
           // Размер шрифта
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.font_size_option,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Slider(
-                value: provider.fontSize,
-                min: 14,
-                max: 28,
-                divisions: 14,
-                label: provider.fontSize.toInt().toString(),
-                onChanged: (value) {
-                  context.read<SettingsProvider>().setFontSize(value);
-                },
-              ),
-            ],
-          ),
+          buildFontSizeTile(context, provider),
 
           // Тип собрания по умолчанию
           ListTile(
@@ -114,6 +64,69 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Column buildFontSizeTile(BuildContext context, SettingsProvider provider) {
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.font_size_option,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Slider(
+              value: provider.fontSize,
+              min: 14,
+              max: 28,
+              divisions: 14,
+              label: provider.fontSize.toInt().toString(),
+              onChanged: (value) {
+                context.read<SettingsProvider>().setFontSize(value);
+              },
+            ),
+          ],
+        );
+  }
+
+  ListTile buildLocaleTile(BuildContext context, SettingsProvider provider) {
+    return ListTile(
+          title: Text(AppLocalizations.of(context)!.language_option),
+          trailing: DropdownButton<String>(
+            value: provider.locale.languageCode,
+            items: [
+              ...AppLocalizations.supportedLocales.map(
+                (locale) => DropdownMenuItem(
+                  value: locale.languageCode,
+                  child: Text(locale.languageCode),
+                ),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                context.read<SettingsProvider>().setLocale(value);
+              }
+            },
+          ),
+        );
+  }
+
+  ListTile buildThemeTile(BuildContext context, SettingsProvider provider) {
+    return ListTile(
+          title: Text(AppLocalizations.of(context)!.theme_option),
+          trailing: DropdownButton<String>(
+            value: provider.themeMode,
+            items:  [
+              DropdownMenuItem(value: 'system', child: Text(AppLocalizations.of(context)!.system_theme)),
+              DropdownMenuItem(value: 'light', child: Text(AppLocalizations.of(context)!.light_theme)),
+              DropdownMenuItem(value: 'dark', child: Text(AppLocalizations.of(context)!.dark_theme)),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                context.read<SettingsProvider>().setThemeMode(value);
+              }
+            },
+          ),
+        );
   }
 
   void _showDefaultMeetingTypeDialog(BuildContext context, SettingsProvider provider) {
