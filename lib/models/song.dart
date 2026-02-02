@@ -114,7 +114,7 @@ class Song {
       id: map['id'] as int,
       title: map['title'] as String,
       number: map['number']?.toString(),
-      verses: verses,
+      verses: verses as List<Verse>,
       startingChorus: _parseChorus(map['starting_chorus']),
       chorus: _parseChorus(map['chorus']),
       endingChorus: _parseChorus(map['ending_chorus']),
