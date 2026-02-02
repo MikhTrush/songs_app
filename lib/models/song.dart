@@ -7,69 +7,152 @@
 //   extremelyFamiliar
 // }
 
+class Verse {
+  final String? number;  // "1", "2", etc. или null для ненумерованных блоков
+  final List<String> lines;
+
+  Verse({this.number, required this.lines});
+
+  /// Возвращает текст куплета как одну строку с переносами
+  String get text => lines.join('\n');
+
+  Map<String, dynamic> toMap() => {
+        'number': number,
+        'lines': lines,
+      };
+
+  factory Verse.fromMap(Map<String, dynamic> map) => Verse(
+        number: map['number']?.toString(),
+        lines: List<String>.from(map['lines'] ?? []),
+      );
+}
+
 class Song {
   final int id;
   final String title;
-  final List<String> verses;      // instead of lyrics
-  final List<String> categories;  // for general categories
-  final List<String> tags;        // for specific tags
-  final List<String> themes;      // for thematic tags
-  // final Familiarity familiarity;
-  // final int? number;
+  final String? number; // номер в сборнике (например, "118")
+  final List<Verse> verses;
+  final List<String>? startingChorus; // припев в начале (опционально)
+  final List<String>? chorus;         // основной припев (опционально)
+  final List<String>? endingChorus;   // финальный припев (опционально)
+  final List<String> categories;
+  final List<String> tags;
+  final List<String> themes;
 
   Song({
     required this.id,
     required this.title,
+    this.number,
     required this.verses,
+    this.startingChorus,
+    this.chorus,
+    this.endingChorus,
     this.categories = const [],
     this.tags = const [],
     this.themes = const [],
-    // this.familiarity = Familiarity.unknown,
-    // this.number
   });
+
+  /// Возвращает полный текст песни в человекочитаемом формате
+  String get fullText {
+    final parts = <String>[];
+
+    if (startingChorus != null) {
+      parts.add('(Припев в начале)\n${startingChorus!.join('\n')}\n');
+    }
+
+    for (final verse in verses) {
+      if (verse.number != null) {
+        parts.add('Куплет ${verse.number}\n${verse.text}');
+      } else {
+        parts.add(verse.text);
+      }
+      if (chorus != null) {
+        parts.add('\n(Припев)\n${chorus!.join('\n')}');
+      }
+      parts.add(''); // пустая строка между куплетами
+    }
+
+    if (endingChorus != null) {
+      parts.add('(Финальный припев)\n${endingChorus!.join('\n')}');
+    }
+
+    return parts.join('\n').trim();
+  }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'title': title,
-      'verses': verses.join('\n---\n'), // delimiter between verses
+      'number': number,
+      'verses': verses.map((v) => v.toMap()).toList(),
+      'starting_chorus': startingChorus,
+      'chorus': chorus,
+      'ending_chorus': endingChorus,
       'categories': categories.join(','),
       'tags': tags.join(','),
       'themes': themes.join(','),
-      // 'familiarity': familiarity.index,
-      // 'number': number,
     };
   }
 
   factory Song.fromMap(Map<String, dynamic> map) {
-    final versesStr = map['verses'] as String?;
-    final verses = <String>[];
-    if (versesStr != null) {
-      // Split by our delimiter
-      verses.addAll(versesStr.split('\n---\n'));
+    // Миграция старого формата (для обратной совместимости)
+    if (map.containsKey('lyrics') && map['lyrics'] != null) {
+      return _migrateFromOldFormat(map);
     }
 
-    final catsStr = map['categories'] as String?;
-    final categories = catsStr?.split(',').where((s) => s.isNotEmpty).toList() ?? [];
+    final versesJson = map['verses'] as List?;
+    final verses = versesJson?.map((v) => Verse.fromMap(v as Map<String, dynamic>)).toList() ?? [];
 
-    final tagsStr = map['tags'] as String?;
-    final tags = tagsStr?.split(',').where((s) => s.isNotEmpty).toList() ?? [];
-
-    final themesStr = map['themes'] as String?;
-    final themes = themesStr?.split(',').where((s) => s.isNotEmpty).toList() ?? [];
-
-    // final familiarity = map['familiarity'] as Familiarity? ?? Familiarity.unknown;
-    // final number = map['number'] as int?;
+    final parseStringList = (dynamic value) {
+      if (value is List<String>) return value;
+      if (value is List<dynamic>) return value.cast<String>();
+      return null;
+    };
 
     return Song(
-      id: map['id'],
-      title: map['title'],
+      id: map['id'] as int,
+      title: map['title'] as String,
+      number: map['number']?.toString(),
       verses: verses,
-      categories: categories,
-      tags: tags,
-      themes: themes,
-      // familiarity: familiarity,
-      // number: number,
+      startingChorus: parseStringList(map['starting_chorus']),
+      chorus: parseStringList(map['chorus']),
+      endingChorus: parseStringList(map['ending_chorus']),
+      categories: _splitCsv(map['categories']),
+      tags: _splitCsv(map['tags']),
+      themes: _splitCsv(map['themes']),
     );
+  }
+
+  /// Миграция из старого формата (для существующих данных)
+  static Song _migrateFromOldFormat(Map<String, dynamic> map) {
+    final lyricsStr = map['lyrics'] as String?;
+    final verses = <Verse>[];
+    
+    if (lyricsStr != null) {
+      final blocks = lyricsStr.split('\n---\n');
+      for (var i = 0; i < blocks.length; i++) {
+        final lines = blocks[i].split('\n').where((l) => l.trim().isNotEmpty).toList();
+        verses.add(Verse(number: (i + 1).toString(), lines: lines));
+      }
+    }
+
+    return Song(
+      id: map['id'] as int,
+      title: map['title'] as String,
+      number: map['number']?.toString(),
+      verses: verses,
+      categories: _splitCsv(map['categories']),
+      tags: _splitCsv(map['tags']),
+      themes: _splitCsv(map['themes']),
+    );
+  }
+
+  static List<String> _splitCsv(dynamic value) {
+    if (value == null) return [];
+    if (value is List<String>) return value;
+    if (value is String) {
+      return value.split(',').where((s) => s.trim().isNotEmpty).map((s) => s.trim()).toList();
+    }
+    return [];
   }
 }
