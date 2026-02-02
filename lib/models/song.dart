@@ -1,11 +1,4 @@
-// enum Familiarity {
-//   unknown,
-//   notFamiliar,
-//   slightlyFamiliar,
-//   familiar,
-//   veryFamiliar,
-//   extremelyFamiliar
-// }
+import 'dart:convert';
 
 class Verse {
   final String? number; // "1", "2", etc. или null для ненумерованных блоков
@@ -19,9 +12,9 @@ class Verse {
   Map<String, dynamic> toMap() => {'number': number, 'lines': lines};
 
   factory Verse.fromMap(Map<String, dynamic> map) => Verse(
-    number: map['number']?.toString(),
-    lines: List<String>.from(map['lines'] ?? []),
-  );
+        number: map['number']?.toString(),
+        lines: List<String>.from(map['lines'] ?? []),
+      );
 }
 
 class Song {
@@ -76,38 +69,45 @@ class Song {
     return parts.join('\n').trim();
   }
 
+  /// Конвертирует объект в Map для сохранения в БД
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'title': title,
       'number': number,
-      'verses': verses.map((v) => v.toMap()).toList(),
-      'starting_chorus': startingChorus,
-      'chorus': chorus,
-      'ending_chorus': endingChorus,
+      'verses': jsonEncode(verses.map((v) => v.toMap()).toList()),
+      'starting_chorus': startingChorus != null ? jsonEncode(startingChorus) : null,
+      'chorus': chorus != null ? jsonEncode(chorus) : null,
+      'ending_chorus': endingChorus != null ? jsonEncode(endingChorus) : null,
       'categories': categories.join(','),
       'tags': tags.join(','),
       'themes': themes.join(','),
     };
   }
 
+  /// Создаёт объект из Map (загрузка из БД)
   factory Song.fromMap(Map<String, dynamic> map) {
     // Миграция старого формата (для обратной совместимости)
     if (map.containsKey('lyrics') && map['lyrics'] != null) {
       return _migrateFromOldFormat(map);
     }
 
-    final versesJson = map['verses'] as List?;
-    final verses =
-        versesJson
-            ?.map((v) => Verse.fromMap(v as Map<String, dynamic>))
-            .toList() ??
-        [];
+    // Парсинг куплетов из JSON
+    final versesJson = map['verses'] as String?;
+    final verses = versesJson != null
+        ? (jsonDecode(versesJson) as List)
+            .map((v) => Verse.fromMap(v as Map<String, dynamic>))
+            .toList()
+        : [];
 
-    List<String>? parseStringList(dynamic value) {
-      if (value is List<String>) return value;
-      if (value is List<dynamic>) return value.cast<String>();
-      return null;
+    // Вспомогательная функция для парсинга припевов
+    List<String>? _parseChorus(String? jsonStr) {
+      if (jsonStr == null || jsonStr == 'null') return null;
+      try {
+        return List<String>.from(jsonDecode(jsonStr));
+      } catch (e) {
+        return null;
+      }
     }
 
     return Song(
@@ -115,9 +115,9 @@ class Song {
       title: map['title'] as String,
       number: map['number']?.toString(),
       verses: verses,
-      startingChorus: parseStringList(map['starting_chorus']),
-      chorus: parseStringList(map['chorus']),
-      endingChorus: parseStringList(map['ending_chorus']),
+      startingChorus: _parseChorus(map['starting_chorus']),
+      chorus: _parseChorus(map['chorus']),
+      endingChorus: _parseChorus(map['ending_chorus']),
       categories: _splitCsv(map['categories']),
       tags: _splitCsv(map['tags']),
       themes: _splitCsv(map['themes']),
@@ -151,19 +151,7 @@ class Song {
     );
   }
 
-  static List<String> _splitCsv(dynamic value) {
-    if (value == null) return [];
-    if (value is List<String>) return value;
-    if (value is String) {
-      return value
-          .split(',')
-          .where((s) => s.trim().isNotEmpty)
-          .map((s) => s.trim())
-          .toList();
-    }
-    return [];
-  }
-
+  /// Создаёт копию объекта с изменёнными полями
   Song copyWith({
     int? id,
     String? title,
@@ -188,5 +176,18 @@ class Song {
       tags: tags ?? this.tags,
       themes: themes ?? this.themes,
     );
+  }
+
+  static List<String> _splitCsv(dynamic value) {
+    if (value == null) return [];
+    if (value is List<String>) return value;
+    if (value is String) {
+      return value
+          .split(',')
+          .where((s) => s.trim().isNotEmpty)
+          .map((s) => s.trim())
+          .toList();
+    }
+    return [];
   }
 }
