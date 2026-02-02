@@ -35,7 +35,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
         // Update values when settings change
         _defaultMeetingType = settingsProvider.defaultMeetingType;
         _meetingTypes = settingsProvider.meetingTypes;
-        
+
         return Scaffold(
           appBar: AppBar(title: Text(widget.song.title)),
           body: Padding(
@@ -43,21 +43,99 @@ class _SongDetailPageState extends State<SongDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Отображение куплетов
+                // Display the starting chorus if it exists
+                if (widget.song.startingChorus != null &&
+                    widget.song.startingChorus!.isNotEmpty)
+                  _buildChorusSection(
+                    widget.song.startingChorus!,
+                    AppLocalizations.of(context)!.starting_chorus,
+                  ),
+
+                // Display verses with chorus after each (if chorus exists)
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: widget.song.verses.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Text(
-                          widget.song.verses[index],
-                          style: const TextStyle(fontSize: 18, height: 1.5),
-                        ),
+                  child: Builder(
+                    builder: (context) {
+                      final sections = <Widget>[];
+
+                      // 1. Первый припев (если есть) — всегда в начале
+                      if (widget.song.startingChorus != null) {
+                        sections.add(
+                          _buildChorusSection(
+                            widget.song.startingChorus!,
+                            AppLocalizations.of(context)!.starting_chorus,
+                          ),
+                        );
+                      }
+
+                      // 2. Куплеты + второй припев ТОЛЬКО после первого куплета
+                      for (int i = 0; i < widget.song.verses.length; i++) {
+                        final verse = widget.song.verses[i];
+                        final verseNumber = verse.number ?? (i + 1);
+
+                        sections.add(
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${AppLocalizations.of(context)!.verse} $verseNumber',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  verse.text,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+
+                        // Второй припев — строго один раз после первого куплета
+                        if (i == 0 && widget.song.chorus != null) {
+                          sections.add(
+                            _buildChorusSection(
+                              widget.song.chorus!,
+                              AppLocalizations.of(context)!.chorus,
+                            ),
+                          );
+                        }
+                      }
+
+                      // 3. Последний припев (если есть) — всегда в конце
+                      if (widget.song.endingChorus != null) {
+                        sections.add(
+                          _buildChorusSection(
+                            widget.song.endingChorus!,
+                            AppLocalizations.of(
+                              context,
+                            )!.ending_chorus, // убедитесь, что строка существует в локализации
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: sections.length,
+                        itemBuilder: (context, index) => sections[index],
                       );
                     },
                   ),
                 ),
+
+                // Display the ending chorus if it exists
+                if (widget.song.endingChorus != null &&
+                    widget.song.endingChorus!.isNotEmpty)
+                  _buildChorusSection(
+                    widget.song.endingChorus!,
+                    AppLocalizations.of(context)!.ending_chorus,
+                  ),
               ],
             ),
           ),
@@ -72,7 +150,34 @@ class _SongDetailPageState extends State<SongDetailPage> {
     );
   }
 
-  Future<void> _showRecordUsageDialog(BuildContext context, SettingsProvider settingsProvider) async {
+  Widget _buildChorusSection(List<String> lines, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '($label)',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            lines.join('\n'),
+            style: const TextStyle(
+              fontSize: 18,
+              height: 1.5,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRecordUsageDialog(
+    BuildContext context,
+    SettingsProvider settingsProvider,
+  ) async {
     DateTime selectedDate = DateTime.now();
     String meetingType = settingsProvider.defaultMeetingType;
 
@@ -113,7 +218,9 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     DropdownButtonFormField<String>(
                       value: meetingType,
                       decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.meeting_type_label,
+                        labelText: AppLocalizations.of(
+                          context,
+                        )!.meeting_type_label,
                       ),
                       items: settingsProvider.meetingTypes.map((type) {
                         return DropdownMenuItem<String>(
@@ -145,13 +252,15 @@ class _SongDetailPageState extends State<SongDetailPage> {
                       usedAt: selectedDate,
                       meetingType: meetingType,
                     );
+
                     await SongDatabase.instance.recordUsage(usage);
-                    
                     if (mounted) {
-                      Navigator.of(context).pop(); // Close dialog
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(AppLocalizations.of(context)!.song_added_to_stats),
+                          content: Text(
+                            AppLocalizations.of(context)!.song_added_to_stats,
+                          ),
                         ),
                       );
                     }
