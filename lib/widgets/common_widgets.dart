@@ -17,13 +17,7 @@ class CommonTagChip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        child: Text(
-          tag,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white,
-          ),
-        ),
+        child: Text(tag, style: TextStyle(fontSize: 12, color: Colors.white)),
       ),
     );
   }
@@ -50,10 +44,7 @@ class SongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        song.title,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
+      title: Text(song.title, style: Theme.of(context).textTheme.titleMedium),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,7 +52,7 @@ class SongTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 4.0),
               child: Text(
-                _getFirstVersePreview(song.verses.first),
+                _getFirstVersePreview(song.verses[0].text),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -121,10 +112,7 @@ class SongTile extends StatelessWidget {
             ),
         ],
       ),
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
     );
   }
@@ -137,11 +125,7 @@ class SongTile extends StatelessWidget {
 }
 
 class CategoryTile extends StatelessWidget {
-  const CategoryTile({
-    super.key,
-    required this.category,
-    this.onTap,
-  });
+  const CategoryTile({super.key, required this.category, this.onTap});
 
   final String category;
   final VoidCallback? onTap;
@@ -151,10 +135,7 @@ class CategoryTile extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(category),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-        ),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),
     );
@@ -231,20 +212,13 @@ class EmptyStateWidget extends StatelessWidget {
 }
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({
-    super.key,
-    required this.title,
-  });
+  const CustomAppBar({super.key, required this.title});
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Text(title),
-      elevation: 0,
-      centerTitle: true,
-    );
+    return AppBar(title: Text(title), elevation: 0, centerTitle: true);
   }
 
   @override
