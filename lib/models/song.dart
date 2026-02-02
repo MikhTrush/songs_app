@@ -56,7 +56,7 @@ class Song {
       } else {
         parts.add(verse.text);
       }
-      if (chorus != null) {
+      if (chorus != null && verse.number == '1') {
         parts.add('\n(Припев)\n${chorus!.join('\n')}');
       }
       parts.add(''); // пустая строка между куплетами
