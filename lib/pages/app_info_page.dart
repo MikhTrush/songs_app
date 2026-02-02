@@ -16,6 +16,7 @@ class AppInfoPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // TODO: Add localization
           Center(child: Text('This is the App Info page')),
           ListTile(title: Text('version')),
         ],
