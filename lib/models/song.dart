@@ -8,7 +8,7 @@
 // }
 
 class Verse {
-  final String? number;  // "1", "2", etc. или null для ненумерованных блоков
+  final String? number; // "1", "2", etc. или null для ненумерованных блоков
   final List<String> lines;
 
   Verse({this.number, required this.lines});
@@ -16,15 +16,12 @@ class Verse {
   /// Возвращает текст куплета как одну строку с переносами
   String get text => lines.join('\n');
 
-  Map<String, dynamic> toMap() => {
-        'number': number,
-        'lines': lines,
-      };
+  Map<String, dynamic> toMap() => {'number': number, 'lines': lines};
 
   factory Verse.fromMap(Map<String, dynamic> map) => Verse(
-        number: map['number']?.toString(),
-        lines: List<String>.from(map['lines'] ?? []),
-      );
+    number: map['number']?.toString(),
+    lines: List<String>.from(map['lines'] ?? []),
+  );
 }
 
 class Song {
@@ -33,8 +30,8 @@ class Song {
   final String? number; // номер в сборнике (например, "118")
   final List<Verse> verses;
   final List<String>? startingChorus; // припев в начале (опционально)
-  final List<String>? chorus;         // основной припев (опционально)
-  final List<String>? endingChorus;   // финальный припев (опционально)
+  final List<String>? chorus; // основной припев (опционально)
+  final List<String>? endingChorus; // финальный припев (опционально)
   final List<String> categories;
   final List<String> tags;
   final List<String> themes;
@@ -101,13 +98,17 @@ class Song {
     }
 
     final versesJson = map['verses'] as List?;
-    final verses = versesJson?.map((v) => Verse.fromMap(v as Map<String, dynamic>)).toList() ?? [];
+    final verses =
+        versesJson
+            ?.map((v) => Verse.fromMap(v as Map<String, dynamic>))
+            .toList() ??
+        [];
 
-    final parseStringList = (dynamic value) {
+    List<String>? parseStringList(dynamic value) {
       if (value is List<String>) return value;
       if (value is List<dynamic>) return value.cast<String>();
       return null;
-    };
+    }
 
     return Song(
       id: map['id'] as int,
@@ -127,11 +128,14 @@ class Song {
   static Song _migrateFromOldFormat(Map<String, dynamic> map) {
     final lyricsStr = map['lyrics'] as String?;
     final verses = <Verse>[];
-    
+
     if (lyricsStr != null) {
       final blocks = lyricsStr.split('\n---\n');
       for (var i = 0; i < blocks.length; i++) {
-        final lines = blocks[i].split('\n').where((l) => l.trim().isNotEmpty).toList();
+        final lines = blocks[i]
+            .split('\n')
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         verses.add(Verse(number: (i + 1).toString(), lines: lines));
       }
     }
@@ -151,7 +155,11 @@ class Song {
     if (value == null) return [];
     if (value is List<String>) return value;
     if (value is String) {
-      return value.split(',').where((s) => s.trim().isNotEmpty).map((s) => s.trim()).toList();
+      return value
+          .split(',')
+          .where((s) => s.trim().isNotEmpty)
+          .map((s) => s.trim())
+          .toList();
     }
     return [];
   }
