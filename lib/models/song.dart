@@ -163,4 +163,30 @@ class Song {
     }
     return [];
   }
+
+  Song copyWith({
+    int? id,
+    String? title,
+    String? number,
+    List<Verse>? verses,
+    List<String>? startingChorus,
+    List<String>? chorus,
+    List<String>? endingChorus,
+    List<String>? categories,
+    List<String>? tags,
+    List<String>? themes,
+  }) {
+    return Song(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      number: number ?? this.number,
+      verses: verses ?? this.verses,
+      startingChorus: startingChorus ?? this.startingChorus,
+      chorus: chorus ?? this.chorus,
+      endingChorus: endingChorus ?? this.endingChorus,
+      categories: categories ?? this.categories,
+      tags: tags ?? this.tags,
+      themes: themes ?? this.themes,
+    );
+  }
 }
