@@ -16,6 +16,9 @@ class _SongFormPageState extends State<SongFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _versesController = TextEditingController();
+  final _startingChorusController = TextEditingController();
+  final _chorusController = TextEditingController();
+  final _endingChorusController = TextEditingController();
   final _categoriesController = TextEditingController();
   final _tagsController = TextEditingController();
   final _themesController = TextEditingController();
@@ -26,10 +29,25 @@ class _SongFormPageState extends State<SongFormPage> {
 
     if (widget.song != null) {
       _titleController.text = widget.song!.title;
-      _versesController.text = widget.song!.verses.join('\n\n');
+      
+      // Format verses for display
+      final verseTexts = widget.song!.verses.map((verse) => verse.lines.join('\n')).toList();
+      _versesController.text = verseTexts.join('\n\n');
+      
       _categoriesController.text = widget.song!.categories.join(',');
       _tagsController.text = widget.song!.tags.join(',');
       _themesController.text = widget.song!.themes.join(',');
+      
+      // Initialize chorus controllers
+      if (widget.song!.startingChorus != null) {
+        _startingChorusController.text = widget.song!.startingChorus!.join('\n');
+      }
+      if (widget.song!.chorus != null) {
+        _chorusController.text = widget.song!.chorus!.join('\n');
+      }
+      if (widget.song!.endingChorus != null) {
+        _endingChorusController.text = widget.song!.endingChorus!.join('\n');
+      }
     }
   }
 
@@ -85,6 +103,30 @@ class _SongFormPageState extends State<SongFormPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _startingChorusController,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.starting_chorus,
+                ),
+                maxLines: 5,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _chorusController,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.chorus,
+                ),
+                maxLines: 5,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _endingChorusController,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.ending_chorus,
+                ),
+                maxLines: 5,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: _categoriesController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.categories,
@@ -114,10 +156,35 @@ class _SongFormPageState extends State<SongFormPage> {
   void _saveSong() {
     if (_formKey.currentState?.validate() != true) return;
 
-    final verses = _versesController.text.split('\n\n')
+    // Parse verses - split by double newlines and create Verse objects
+    final verseBlocks = _versesController.text.split('\n\n')
         .map((v) => v.trim())
         .where((v) => v.isNotEmpty)
         .toList();
+    
+    List<Verse> verses = [];
+    for (int i = 0; i < verseBlocks.length; i++) {
+      // Split each verse block into lines
+      final lines = verseBlocks[i].split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList();
+      verses.add(Verse(number: (i+1).toString(), lines: lines));
+    }
+        
+    // Process chorus fields
+    List<String>? startingChorus = _startingChorusController.text.trim().isEmpty 
+        ? null 
+        : _startingChorusController.text.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    
+    List<String>? chorus = _chorusController.text.trim().isEmpty 
+        ? null 
+        : _chorusController.text.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+        
+    List<String>? endingChorus = _endingChorusController.text.trim().isEmpty 
+        ? null 
+        : _endingChorusController.text.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
     final categories = _categoriesController.text.split(',')
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
@@ -135,6 +202,9 @@ class _SongFormPageState extends State<SongFormPage> {
       id: widget.song?.id ?? 0, // Will be ignored for new songs
       title: _titleController.text,
       verses: verses,
+      startingChorus: startingChorus,
+      chorus: chorus,
+      endingChorus: endingChorus,
       categories: categories,
       tags: tags,
       themes: themes,
@@ -155,6 +225,9 @@ class _SongFormPageState extends State<SongFormPage> {
   void dispose() {
     _titleController.dispose();
     _versesController.dispose();
+    _startingChorusController.dispose();
+    _chorusController.dispose();
+    _endingChorusController.dispose();
     _categoriesController.dispose();
     _tagsController.dispose();
     _themesController.dispose();
