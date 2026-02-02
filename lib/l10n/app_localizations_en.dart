@@ -315,4 +315,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get app_info => 'App Info';
+
+  @override
+  String get starting_chorus => 'Starting chorus';
+
+  @override
+  String get verse => 'Verse';
+
+  @override
+  String get chorus => 'Chorus';
+
+  @override
+  String get ending_chorus => 'Ending chorus';
 }

@@ -670,6 +670,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App Info'**
   String get app_info;
+
+  /// No description provided for @starting_chorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting chorus'**
+  String get starting_chorus;
+
+  /// No description provided for @verse.
+  ///
+  /// In en, this message translates to:
+  /// **'Verse'**
+  String get verse;
+
+  /// No description provided for @chorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Chorus'**
+  String get chorus;
+
+  /// No description provided for @ending_chorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Ending chorus'**
+  String get ending_chorus;
 }
 
 class _AppLocalizationsDelegate

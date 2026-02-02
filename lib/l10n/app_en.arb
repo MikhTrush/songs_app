@@ -93,5 +93,9 @@
   "recently_used_list_desc": "List of songs used in the last sessions",
   "no_data_available": "No data available",
   "see_all": "See All",
-  "app_info": "App Info"
+  "app_info": "App Info",
+  "starting_chorus": "Starting chorus",
+  "verse": "Verse",
+  "chorus": "Chorus",
+  "ending_chorus": "Ending chorus"
 }

@@ -315,4 +315,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get app_info => 'Информация о приложении';
+
+  @override
+  String get starting_chorus => 'Первый припев';
+
+  @override
+  String get verse => 'Куплет';
+
+  @override
+  String get chorus => 'Припев';
+
+  @override
+  String get ending_chorus => 'Последний припев';
 }
