@@ -54,7 +54,7 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     setState(() => _isLoading = true);
-    final results = await SongDatabase.instance.searchOnlyText(query);
+    final results = await SongDatabase.instance.searchOnlyText(query.toLowerCase());
     setState(() {
       _searchResults = results;
       _isLoading = false;

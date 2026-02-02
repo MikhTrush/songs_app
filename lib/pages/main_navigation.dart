@@ -1,6 +1,6 @@
 // pages/main_navigation.dart
 import 'package:flutter/material.dart';
-import 'search.dart';
+import 'search_page.dart';
 import 'collections_page.dart';
 import 'statistics_page.dart';
 import 'recommendations_page.dart'; // Add the recommendations page
