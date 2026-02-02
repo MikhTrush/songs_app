@@ -139,20 +139,48 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  // Helper function to find the first verse containing the search term
+  // Helper function to find the first verse or chorus containing the search term
   String _findVerseWithMatch(Song song, String searchTerm) {
-    if (searchTerm.isEmpty) return song.verses.isNotEmpty ? song.verses[0] : '';
+    if (searchTerm.isEmpty) return song.verses.isNotEmpty ? song.verses[0].text : '';
 
     final lowerSearchTerm = searchTerm.toLowerCase();
 
-    for (String verse in song.verses) {
-      if (verse.toLowerCase().contains(lowerSearchTerm)) {
-        return _trimVerseToLines(verse, 3);
+    // Check starting chorus first
+    if (song.startingChorus != null) {
+      for (String line in song.startingChorus!) {
+        if (line.toLowerCase().contains(lowerSearchTerm)) {
+          return _trimVerseToLines(line, 3);
+        }
+      }
+    }
+
+    // Then check verses
+    for (Verse verse in song.verses) {
+      if (verse.text.toLowerCase().contains(lowerSearchTerm)) {
+        return _trimVerseToLines(verse.text, 3);
+      }
+    }
+
+    // Then check main chorus
+    if (song.chorus != null) {
+      for (String line in song.chorus!) {
+        if (line.toLowerCase().contains(lowerSearchTerm)) {
+          return _trimVerseToLines(line, 3);
+        }
+      }
+    }
+
+    // Finally check ending chorus
+    if (song.endingChorus != null) {
+      for (String line in song.endingChorus!) {
+        if (line.toLowerCase().contains(lowerSearchTerm)) {
+          return _trimVerseToLines(line, 3);
+        }
       }
     }
 
     // Fallback to first verse if no match found
-    return song.verses.isNotEmpty ? _trimVerseToLines(song.verses[0], 3) : '';
+    return song.verses.isNotEmpty ? _trimVerseToLines(song.verses[0].text, 3) : '';
   }
 
   // Helper function to trim a verse to a specific number of lines
