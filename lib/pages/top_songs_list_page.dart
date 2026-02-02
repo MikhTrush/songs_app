@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../db/song_database.dart';
-import '../models/song.dart';
 import 'song_detail_page.dart';
 import '../l10n/app_localizations.dart';
 

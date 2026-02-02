@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:songs_app/l10n/app_localizations.dart';
@@ -6,7 +5,7 @@ import 'package:songs_app/models/category.dart';
 import 'package:songs_app/pages/song_detail_page.dart';
 import '../db/song_database.dart';
 import '../models/song.dart';
-import 'collections_page.dart'; // Import the collections page
+// Import the collections page
 
 class SearchPage extends StatefulWidget {
   const SearchPage({

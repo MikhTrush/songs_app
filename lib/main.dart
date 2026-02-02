@@ -7,7 +7,7 @@ import 'package:songs_app/l10n/app_localizations.dart';
 import 'package:songs_app/pages/main_navigation.dart';
 import 'package:songs_app/providers/settings_provider.dart'; // ← ваш новый провайдер
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:songs_app/services/settings_service.dart'; // оставляем для совместимости
+// оставляем для совместимости
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -312,4 +312,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get see_all => 'See All';
+
+  @override
+  String get app_info => 'App Info';
 }

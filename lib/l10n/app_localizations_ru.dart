@@ -312,4 +312,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get see_all => 'Посмотреть все';
+
+  @override
+  String get app_info => 'Информация о приложении';
 }

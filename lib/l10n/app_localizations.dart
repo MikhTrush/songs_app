@@ -664,6 +664,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See All'**
   String get see_all;
+
+  /// No description provided for @app_info.
+  ///
+  /// In en, this message translates to:
+  /// **'App Info'**
+  String get app_info;
 }
 
 class _AppLocalizationsDelegate
