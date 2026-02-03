@@ -76,14 +76,14 @@ class Song {
     return {
       'id': id,
       'title': title,
+      'title_lower': title.toLowerCase(), // ← добавить
       'number': number,
       'is_system': isSystem ? 1 : 0,
       'verses': jsonEncode(verses.map((v) => v.toMap()).toList()),
-      'starting_chorus': startingChorus != null
-          ? jsonEncode(startingChorus)
-          : null,
-      'chorus': chorus != null ? jsonEncode(chorus) : null,
-      'ending_chorus': endingChorus != null ? jsonEncode(endingChorus) : null,
+      'verses_lower': _versesToPlainText(verses), // ← добавить
+      'starting_chorus': startingChorus,
+      'chorus': chorus,
+      'ending_chorus': endingChorus,
       'categories': categories.join(','),
       'tags': tags.join(','),
       'themes': themes.join(','),
@@ -195,5 +195,30 @@ class Song {
           .toList();
     }
     return [];
+  }
+
+  // Преобразует список куплетов в plain text (для поиска)
+  String _versesToPlainText(List<Verse> verses) {
+    return verses
+        .map((verse) => verse.lines.join('\n'))
+        .where((text) => text.isNotEmpty)
+        .join('\n\n');
+  }
+
+  // Распарсить существующий JSON из БД и получить plain text
+  String _jsonVersesToPlainText(String jsonVerses) {
+    try {
+      final versesJson = json.decode(jsonVerses) as List<dynamic>;
+      return versesJson
+          .map((v) {
+            final verse = v as Map<String, dynamic>;
+            final lines = (verse['lines'] as List<dynamic>).cast<String>();
+            return lines.join('\n');
+          })
+          .where((text) => text.isNotEmpty)
+          .join('\n\n');
+    } catch (e) {
+      return ''; // На случай повреждённых данных
+    }
   }
 }
