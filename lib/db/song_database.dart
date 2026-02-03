@@ -23,21 +23,25 @@ class SongDatabase {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    // Удаляем старую БД при любом изменении (только для dev!)
-    // await deleteDatabase(path);
-
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 2, // Повышаем версию для миграции
+      onCreate: _createDB,
+      onUpgrade: _migrateDB, // Добавляем миграцию
+    );
   }
 
+  // Новая схема с полями *_lower
   Future _createDB(Database db, int version) async {
-    // Схема с полной поддержкой новых полей
     await db.execute('''
     CREATE TABLE songs(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
+      title_lower TEXT NOT NULL,  -- Для case-insensitive поиска (кириллица)
       number TEXT,
       is_system INTEGER NOT NULL DEFAULT 0,
       verses TEXT NOT NULL,
+      verses_lower TEXT NOT NULL, -- Для case-insensitive поиска (кириллица)
       starting_chorus TEXT,
       chorus TEXT,
       ending_chorus TEXT,
@@ -47,9 +51,11 @@ class SongDatabase {
     )
   ''');
 
+    // Индексы для производительности поиска
     await db.execute('CREATE INDEX idx_songs_number ON songs(number)');
     await db.execute('CREATE INDEX idx_songs_is_system ON songs(is_system)');
-    await db.execute('CREATE INDEX idx_songs_title ON songs(title)');
+    await db.execute('CREATE INDEX idx_songs_title_lower ON songs(title_lower)');
+    await db.execute('CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)');
 
     await db.execute('''
     CREATE TABLE collections(
@@ -83,19 +89,114 @@ class SongDatabase {
 
   Future<Song> create(Song song) async {
     final db = await instance.database;
-    final data = song.toMap()..remove('id'); // id генерируется БД
+    final data = {
+      'title': song.title,
+      'title_lower': song.title.toLowerCase(),
+      'number': song.number,
+      'is_system': song.isSystem ? 1 : 0,
+      'verses': jsonEncode(song.verses.map((v) => v.toMap()).toList()),
+      'verses_lower': _versesToPlainText(song.verses).toLowerCase(),
+      'starting_chorus': song.startingChorus,
+      'chorus': song.chorus,
+      'ending_chorus': song.endingChorus,
+      'categories': song.categories.join(','),
+      'tags': song.tags.join(','),
+      'themes': song.themes.join(','),
+    };
+
     final id = await db.insert('songs', data);
     return song.copyWith(id: id);
   }
+
+  // Миграция с версии 1 → 2
+  Future _migrateDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      print('🔄 Миграция БД: добавление полей title_lower и verses_lower...');
+
+      // 1. Добавляем новые колонки
+      await db.execute('ALTER TABLE songs ADD COLUMN title_lower TEXT');
+      await db.execute('ALTER TABLE songs ADD COLUMN verses_lower TEXT');
+
+      // 2. Заполняем их значениями в нижнем регистре
+      final allSongs = await db.query('songs', columns: ['id', 'title', 'verses']);
+      for (final song in allSongs) {
+        final id = song['id'] as int;
+        final title = song['title'] as String? ?? '';
+        final verses = song['verses'] as String? ?? '';
+
+        await db.update(
+          'songs',
+          {
+            'title_lower': title.toLowerCase(),
+            'verses_lower': _jsonVersesToPlainText(verses).toLowerCase(),
+          },
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+
+      // 3. Делаем колонки NOT NULL (SQLite не поддерживает ALTER для NOT NULL напрямую)
+      // Создаём новую таблицу и переносим данные
+      await db.transaction((txn) async {
+        // Переименовываем старую таблицу
+        await txn.execute('ALTER TABLE songs RENAME TO songs_old');
+
+        // Создаём новую схему с правильной структурой
+        await txn.execute('''
+        CREATE TABLE songs(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          title_lower TEXT NOT NULL,
+          number TEXT,
+          is_system INTEGER NOT NULL DEFAULT 0,
+          verses TEXT NOT NULL,
+          verses_lower TEXT NOT NULL,
+          starting_chorus TEXT,
+          chorus TEXT,
+          ending_chorus TEXT,
+          categories TEXT,
+          tags TEXT,
+          themes TEXT
+        )
+      ''');
+
+        // Копируем данные
+        await txn.execute('''
+        INSERT INTO songs 
+        SELECT id, title, title_lower, number, is_system, verses, verses_lower,
+               starting_chorus, chorus, ending_chorus, categories, tags, themes
+        FROM songs_old
+      ''');
+
+        // Удаляем старую таблицу
+        await txn.execute('DROP TABLE songs_old');
+      });
+
+      // 4. Добавляем индексы
+      await db.execute('CREATE INDEX idx_songs_title_lower ON songs(title_lower)');
+      await db.execute('CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)');
+
+      print('✅ Миграция завершена: ${allSongs.length} песен обновлено');
+    }
+  }
+
+  // === Методы поиска (обновлены для использования *_lower) ===
 
   Future<List<Song>> search(String query) async {
     if (query.isEmpty) return [];
 
     final db = await instance.database;
+    final normalizedQuery = query.toLowerCase();
+
     final maps = await db.query(
       'songs',
-      where: 'title LIKE ? OR verses LIKE ? OR tags LIKE ? OR themes LIKE ?',
-      whereArgs: ['%$query%', '%$query%', '%$query%', '%$query%'],
+      where: 'title_lower LIKE ? OR verses_lower LIKE ? OR tags LIKE ? OR themes LIKE ?',
+      whereArgs: [
+        '%$normalizedQuery%',
+        '%$normalizedQuery%',
+        '%$query%', // tags/themes обычно в нижнем регистре, но оставляем как есть
+        '%$query%',
+      ],
     );
 
     return maps.map((e) => Song.fromMap(e)).toList();
@@ -105,10 +206,12 @@ class SongDatabase {
     if (query.isEmpty) return [];
 
     final db = await instance.database;
+    final normalizedQuery = query.toLowerCase();
+
     final maps = await db.query(
       'songs',
-      where: 'title LIKE ? OR verses LIKE ?',
-      whereArgs: ['%$query%', '%$query%'],
+      where: 'title_lower LIKE ? OR verses_lower LIKE ?',
+      whereArgs: ['%$normalizedQuery%', '%$normalizedQuery%'],
     );
 
     return maps.map((e) => Song.fromMap(e)).toList();
@@ -118,10 +221,12 @@ class SongDatabase {
     if (query.isEmpty) return [];
 
     final db = await instance.database;
+    final normalizedQuery = query.toLowerCase();
+
     final maps = await db.query(
       'songs',
-      where: 'title LIKE ?',
-      whereArgs: ['%$query%'],
+      where: 'title_lower LIKE ?',
+      whereArgs: ['%$normalizedQuery%'],
     );
 
     return maps.map((e) => Song.fromMap(e)).toList();
@@ -131,10 +236,12 @@ class SongDatabase {
     if (query.isEmpty) return [];
 
     final db = await instance.database;
+    final normalizedQuery = query.toLowerCase();
+
     final maps = await db.query(
       'songs',
-      where: 'title LIKE ?',
-      whereArgs: ['%$query%'],
+      where: 'verses_lower LIKE ?',
+      whereArgs: ['%$normalizedQuery%'],
     );
 
     return maps.map((e) => Song.fromMap(e)).toList();
@@ -144,7 +251,6 @@ class SongDatabase {
   Future<void> insertSystemSongs() async {
     final db = await instance.database;
 
-    // Проверяем, есть ли уже системные песни
     final hasSystemSongs = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM songs WHERE is_system = 1'),
     );
@@ -156,7 +262,6 @@ class SongDatabase {
 
     print('📥 Загрузка системных песен из сборника "Песнь Возрождения"...');
 
-    // Загружаем JSON из ассетов
     final jsonString = await rootBundle.loadString(
       'assets/data/songs_sr_processed.json',
     );
@@ -164,16 +269,28 @@ class SongDatabase {
 
     final startTime = DateTime.now();
 
-    // Используем ТРАНЗАКЦИЮ для максимальной производительности
     await db.transaction((txn) async {
       for (var i = 0; i < songsJson.length; i++) {
         final songJson = songsJson[i] as Map<String, dynamic>;
-
-        // Преобразуем в объект Song
         final song = _songFromJson(songJson, isSystem: true);
 
-        // Вставляем напрямую в транзакцию (без создания объекта через create())
-        await txn.insert('songs', song.toMap()..remove('id'));
+        // Заполняем *_lower поля
+        final data = {
+          'title': song.title,
+          'title_lower': song.title.toLowerCase(),
+          'number': song.number,
+          'is_system': song.isSystem ? 1 : 0,
+          'verses': jsonEncode(song.verses.map((v) => v.toMap()).toList()),
+          'verses_lower': _versesToPlainText(song.verses).toLowerCase(),
+          'starting_chorus': song.startingChorus,
+          'chorus': song.chorus,
+          'ending_chorus': song.endingChorus,
+          'categories': song.categories.join(','),
+          'tags': song.tags.join(','),
+          'themes': song.themes.join(','),
+        };
+
+        await txn.insert('songs', data);
 
         if ((i + 1) % 100 == 0) {
           print('  Загружено ${i + 1}/${songsJson.length} песен');
@@ -187,20 +304,44 @@ class SongDatabase {
     );
   }
 
+  // Вспомогательный метод для преобразования куплетов в строку
+  String _versesToPlainText(List<Verse> verses) {
+    return verses.map((v) => v.lines.join('\n')).join('\n\n');
+  }
+
+  // Распарсить существующий JSON из БД и получить plain text
+  String _jsonVersesToPlainText(String jsonVerses) {
+    try {
+      final versesJson = json.decode(jsonVerses) as List<dynamic>;
+      return versesJson
+          .map((v) {
+            final verse = v as Map<String, dynamic>;
+            final lines = (verse['lines'] as List<dynamic>).cast<String>();
+            return lines.join('\n');
+          })
+          .where((text) => text.isNotEmpty)
+          .join('\n\n');
+    } catch (e) {
+      return ''; // На случай повреждённых данных
+    }
+  }
+
   /// Вспомогательный метод: создаёт объект Song из JSON
   Song _songFromJson(Map<String, dynamic> json, {required bool isSystem}) {
+    final verses = (json['verses'] as List<dynamic>).map((v) {
+      final verseJson = v as Map<String, dynamic>;
+      return Verse(
+        number: verseJson['number']?.toString(),
+        lines: List<String>.from(verseJson['lines'] ?? []),
+      );
+    }).toList();
+
     return Song(
       id: 0, // будет заменён БД
       title: json['title'] as String,
       number: json['number']?.toString(),
       isSystem: isSystem,
-      verses: (json['verses'] as List<dynamic>).map((v) {
-        final verseJson = v as Map<String, dynamic>;
-        return Verse(
-          number: verseJson['number']?.toString(),
-          lines: List<String>.from(verseJson['lines'] ?? []),
-        );
-      }).toList(),
+      verses: verses,
       startingChorus: _parseStringList(json['starting_chorus']),
       chorus: _parseStringList(json['chorus']),
       endingChorus: _parseStringList(json['ending_chorus']),
@@ -479,9 +620,24 @@ class SongDatabase {
   // Update an existing song
   Future<void> updateSong(Song song) async {
     final db = await instance.database;
+    final data = {
+      'title': song.title,
+      'title_lower': song.title.toLowerCase(),
+      'number': song.number,
+      'is_system': song.isSystem ? 1 : 0,
+      'verses': jsonEncode(song.verses.map((v) => v.toMap()).toList()),
+      'verses_lower': _versesToPlainText(song.verses).toLowerCase(),
+      'starting_chorus': song.startingChorus,
+      'chorus': song.chorus,
+      'ending_chorus': song.endingChorus,
+      'categories': song.categories.join(','),
+      'tags': song.tags.join(','),
+      'themes': song.themes.join(','),
+    };
+
     await db.update(
       'songs',
-      song.toMap()..remove('id'),
+      data,
       where: 'id = ?',
       whereArgs: [song.id],
     );
@@ -527,7 +683,7 @@ class SongDatabase {
     final maps = await db.query(
       'songs',
       where: 'number LIKE ?',
-      whereArgs: ['%$query%', '%$query%'],
+      whereArgs: ['%$query%'],
     );
 
     return maps.map((e) => Song.fromMap(e)).toList();
