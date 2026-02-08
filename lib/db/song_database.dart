@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:songs_app/models/song_usage.dart';
@@ -23,12 +24,39 @@ class SongDatabase {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 2, // Повышаем версию для миграции
-      onCreate: _createDB,
-      onUpgrade: _migrateDB, // Добавляем миграцию
-    );
+    // Проверяем, существует ли БД
+    final exists = await databaseExists(path);
+    if (!exists) {
+      // Копируем предзаполненную БД из ассетов
+      await _copyPrepopulatedDB(path);
+      return await openDatabase(path, version: 2, onUpgrade: _migrateDB);
+    }
+
+    return await openDatabase(path, version: 2, onUpgrade: _migrateDB);
+  }
+
+  Future<void> _copyPrepopulatedDB(String path) async {
+    try {
+      // Создаём директорию, если её нет
+      await Directory(dirname(path)).create(recursive: true);
+
+      // Копируем файл из ассетов
+      final data = await rootBundle.load('assets/database/songs.db');
+      final bytes = data.buffer.asUint8List();
+      await File(path).writeAsBytes(bytes, flush: true);
+
+      // print('✅ Предзаполненная БД скопирована: $path');
+    } catch (e) {
+      // print('⚠️ Ошибка копирования БД: $e');
+      // print('🔄 Создаём БД с нуля и загружаем песни из JSON...');
+
+      // Резервный вариант: создаём пустую БД и загружаем данные
+      final db = await openDatabase(path, version: 2, onCreate: _createDB);
+      await db.close();
+
+      // Загружаем системные песни
+      await insertSystemSongs();
+    }
   }
 
   // Новая схема с полями *_lower
@@ -54,8 +82,12 @@ class SongDatabase {
     // Индексы для производительности поиска
     await db.execute('CREATE INDEX idx_songs_number ON songs(number)');
     await db.execute('CREATE INDEX idx_songs_is_system ON songs(is_system)');
-    await db.execute('CREATE INDEX idx_songs_title_lower ON songs(title_lower)');
-    await db.execute('CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)');
+    await db.execute(
+      'CREATE INDEX idx_songs_title_lower ON songs(title_lower)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)',
+    );
 
     await db.execute('''
     CREATE TABLE collections(
@@ -111,14 +143,17 @@ class SongDatabase {
   // Миграция с версии 1 → 2
   Future _migrateDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      print('🔄 Миграция БД: добавление полей title_lower и verses_lower...');
+      // print('🔄 Миграция БД: добавление полей title_lower и verses_lower...');
 
       // 1. Добавляем новые колонки
       await db.execute('ALTER TABLE songs ADD COLUMN title_lower TEXT');
       await db.execute('ALTER TABLE songs ADD COLUMN verses_lower TEXT');
 
       // 2. Заполняем их значениями в нижнем регистре
-      final allSongs = await db.query('songs', columns: ['id', 'title', 'verses']);
+      final allSongs = await db.query(
+        'songs',
+        columns: ['id', 'title', 'verses'],
+      );
       for (final song in allSongs) {
         final id = song['id'] as int;
         final title = song['title'] as String? ?? '';
@@ -173,10 +208,14 @@ class SongDatabase {
       });
 
       // 4. Добавляем индексы
-      await db.execute('CREATE INDEX idx_songs_title_lower ON songs(title_lower)');
-      await db.execute('CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)');
+      await db.execute(
+        'CREATE INDEX idx_songs_title_lower ON songs(title_lower)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_songs_verses_lower ON songs(verses_lower)',
+      );
 
-      print('✅ Миграция завершена: ${allSongs.length} песен обновлено');
+      // print('✅ Миграция завершена: ${allSongs.length} песен обновлено');
     }
   }
 
@@ -190,7 +229,8 @@ class SongDatabase {
 
     final maps = await db.query(
       'songs',
-      where: 'title_lower LIKE ? OR verses_lower LIKE ? OR tags LIKE ? OR themes LIKE ?',
+      where:
+          'title_lower LIKE ? OR verses_lower LIKE ? OR tags LIKE ? OR themes LIKE ?',
       whereArgs: [
         '%$normalizedQuery%',
         '%$normalizedQuery%',
@@ -256,11 +296,11 @@ class SongDatabase {
     );
 
     if (hasSystemSongs != null && hasSystemSongs > 0) {
-      print('✅ Системные песни уже загружены ($hasSystemSongs шт.)');
+      // print('✅ Системные песни уже загружены ($hasSystemSongs шт.)');
       return;
     }
 
-    print('📥 Загрузка системных песен из сборника "Песнь Возрождения"...');
+    // print('📥 Загрузка системных песен из сборника "Песнь Возрождения"...');
 
     final jsonString = await rootBundle.loadString(
       'assets/data/songs_sr_processed.json',
@@ -635,12 +675,7 @@ class SongDatabase {
       'themes': song.themes.join(','),
     };
 
-    await db.update(
-      'songs',
-      data,
-      where: 'id = ?',
-      whereArgs: [song.id],
-    );
+    await db.update('songs', data, where: 'id = ?', whereArgs: [song.id]);
   }
 
   // Remove a song from a specific collection but keep the song
