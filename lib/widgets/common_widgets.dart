@@ -44,7 +44,7 @@ class SongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(song.title, style: Theme.of(context).textTheme.titleMedium),
+      title: Text( '${song.number} ${song.title}', style: Theme.of(context).textTheme.titleMedium),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -14,7 +14,7 @@ class SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 40, left: 20, right: 20),
+      margin: EdgeInsets.only(top: 20, left: 10, right: 10),
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(

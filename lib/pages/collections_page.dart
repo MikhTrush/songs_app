@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:songs_app/pages/collection_form_dialog.dart';
 import 'package:songs_app/pages/collection_detail_page.dart';
 import '../db/song_database.dart';
 import '../models/collection.dart';
@@ -17,6 +18,9 @@ class CollectionsPage extends StatefulWidget {
 class _CollectionsPageState extends State<CollectionsPage> {
   late Future<List<Collection>> _collectionsFuture;
 
+  String get noCollection2 => AppLocalizations.of(context)!.no_collection;
+  String get noCollectionDesc2 => AppLocalizations.of(context)!.no_collection_desc;
+
   @override
   void initState() {
     super.initState();
@@ -32,8 +36,8 @@ class _CollectionsPageState extends State<CollectionsPage> {
     // Create a special collection for songs without collection
     final noCollection = Collection(
       id: -1, // Special ID for NoCollection
-      name: AppLocalizations.of(context)!.no_collection,
-      description: AppLocalizations.of(context)!.no_collection_desc,
+      name: noCollection2,
+      description: noCollectionDesc2,
       songIds: songsWithoutCollection.map((song) => song.id).toList(),
     );
 
@@ -65,7 +69,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
     );
   }
 
-  FutureBuilder<List<Collection>> BuildCollections() {
+  FutureBuilder<List<Collection>> buildCollections() {
     return FutureBuilder<List<Collection>>(
       future: _collectionsFuture,
       builder: (context, snapshot) {
@@ -126,45 +130,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
                               ),
                             ),
                           const SizedBox(height: 8),
-                          FutureBuilder<List<Song>>(
-                            future: _getSongsForCollection(collection),
-                            builder: (context, songsSnapshot) {
-                              if (songsSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const LinearProgressIndicator();
-                              }
-
-                              if (songsSnapshot.hasError) {
-                                return Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.error_occurred(songsSnapshot.error ?? ""),
-                                );
-                              }
-
-                              final songs = songsSnapshot.data ?? [];
-
-                              if (songs.isEmpty) {
-                                return Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.no_songs_in_collection,
-                                );
-                              }
-
-                              return Column(
-                                children: songs
-                                    .map(
-                                      (song) => SongCollectionTile(
-                                        song,
-                                        context,
-                                        collection,
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            },
-                          ),
+                          buildSongsList(collection),
                           const SizedBox(height: 8),
                           if (collection.id !=
                               -1) // Don't show edit/delete buttons for NoCollection
@@ -205,6 +171,37 @@ class _CollectionsPageState extends State<CollectionsPage> {
               );
             },
           ),
+        );
+      },
+    );
+  }
+
+  FutureBuilder<List<Song>> buildSongsList(Collection collection) {
+    return FutureBuilder<List<Song>>(
+      future: _getSongsForCollection(collection),
+      builder: (context, songsSnapshot) {
+        if (songsSnapshot.connectionState == ConnectionState.waiting) {
+          return const LinearProgressIndicator();
+        }
+
+        if (songsSnapshot.hasError) {
+          return Text(
+            AppLocalizations.of(
+              context,
+            )!.error_occurred(songsSnapshot.error ?? ""),
+          );
+        }
+
+        final songs = songsSnapshot.data ?? [];
+
+        if (songs.isEmpty) {
+          return Text(AppLocalizations.of(context)!.no_songs_in_collection);
+        }
+
+        return Column(
+          children: songs
+              .map((song) => SongCollectionTile(song, context, collection))
+              .toList(),
         );
       },
     );
@@ -346,7 +343,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
   void _createNewCollection(BuildContext context) async {
     final Collection? newCollection = await showDialog<Collection>(
       context: context,
-      builder: (context) => _CollectionFormDialog(collection: null),
+      builder: (context) => CollectionFormDialog(collection: null),
     );
 
     if (newCollection != null) {
@@ -360,7 +357,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
   void _editCollection(BuildContext context, Collection collection) async {
     final Collection? updatedCollection = await showDialog<Collection>(
       context: context,
-      builder: (context) => _CollectionFormDialog(collection: collection),
+      builder: (context) => CollectionFormDialog(collection: collection),
     );
 
     if (updatedCollection != null) {
@@ -534,150 +531,6 @@ class _CollectionsPageState extends State<CollectionsPage> {
         ],
       ),
     );
-  }
-}
-
-class _CollectionFormDialog extends StatefulWidget {
-  final Collection? collection;
-
-  const _CollectionFormDialog({this.collection});
-
-  @override
-  State<_CollectionFormDialog> createState() => _CollectionFormDialogState();
-}
-
-class _CollectionFormDialogState extends State<_CollectionFormDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  List<Song> _allSongs = [];
-  Set<int> _selectedSongIds = <int>{};
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.collection != null) {
-      _nameController.text = widget.collection!.name;
-      _descriptionController.text = widget.collection!.description;
-      _selectedSongIds = widget.collection!.songIds.toSet();
-    }
-
-    _loadSongs();
-  }
-
-  Future<void> _loadSongs() async {
-    final songs = await SongDatabase.instance.getAllSongs();
-    setState(() {
-      _allSongs = songs;
-      if (widget.collection != null) {
-        // Pre-select songs that are already in the collection
-        _selectedSongIds = widget.collection!.songIds.toSet();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        widget.collection != null
-            ? AppLocalizations.of(context)!.edit_collection
-            : AppLocalizations.of(context)!.create_collection,
-      ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.name_field,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.please_enter_name;
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.description,
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  AppLocalizations.of(context)!.select_songs,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  children: _allSongs
-                      .map(
-                        (song) => CheckboxListTile(
-                          key: ValueKey(song.id),
-                          title: Text(song.title),
-                          value: _selectedSongIds.contains(song.id),
-                          onChanged: (checked) {
-                            setState(() {
-                              if (checked == true) {
-                                _selectedSongIds.add(song.id);
-                              } else {
-                                _selectedSongIds.remove(song.id);
-                              }
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState?.validate() == true) {
-              final collection = Collection(
-                id:
-                    widget.collection?.id ??
-                    0, // Will be ignored for new collections
-                name: _nameController.text,
-                description: _descriptionController.text,
-                songIds: _selectedSongIds.toList(),
-              );
-              Navigator.pop(context, collection);
-            }
-          },
-          child: Text(
-            widget.collection != null
-                ? AppLocalizations.of(context)!.update
-                : AppLocalizations.of(context)!.create,
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
   }
 }
 

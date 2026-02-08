@@ -5,21 +5,29 @@ import 'package:songs_app/models/collection.dart';
 import 'package:songs_app/models/song.dart';
 import 'package:songs_app/widgets/common_widgets.dart';
 
-class CollectionDetailPage extends StatelessWidget {
+// TODO: add search over a collection
+// TODO: add all delete and add methods from collection page
+class CollectionDetailPage extends StatefulWidget {
   const CollectionDetailPage({super.key, required this.collection});
 
   final Collection collection;
 
+  @override
+  State<CollectionDetailPage> createState() => _CollectionDetailPageState();
+}
+
+class _CollectionDetailPageState extends State<CollectionDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.collections)),
       body: Center(
         child: FutureBuilder(
-          future: _getSongsForCollection(collection),
+          future: _getSongsForCollection(widget.collection),
           builder: (context, snapshot) {
             final collection = snapshot.data ?? [];
             return ListView.builder(
+              itemCount: collection.length,
               itemBuilder: (context, index) =>
                   SongTile(song: collection[index]),
             );
