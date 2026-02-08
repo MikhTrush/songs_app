@@ -12,15 +12,16 @@ class Verse {
   Map<String, dynamic> toMap() => {'number': number, 'lines': lines};
 
   factory Verse.fromMap(Map<String, dynamic> map) => Verse(
-        number: map['number']?.toString(),
-        lines: List<String>.from(map['lines'] ?? []),
-      );
+    number: map['number']?.toString(),
+    lines: List<String>.from(map['lines'] ?? []),
+  );
 }
 
 class Song {
   final int id;
   final String title;
   final String? number; // номер в сборнике (например, "118")
+  final bool isSystem;
   final List<Verse> verses;
   final List<String>? startingChorus; // припев в начале (опционально)
   final List<String>? chorus; // основной припев (опционально)
@@ -33,6 +34,7 @@ class Song {
     required this.id,
     required this.title,
     this.number,
+    this.isSystem = false,
     required this.verses,
     this.startingChorus,
     this.chorus,
@@ -75,8 +77,11 @@ class Song {
       'id': id,
       'title': title,
       'number': number,
+      'is_system': isSystem ? 1 : 0,
       'verses': jsonEncode(verses.map((v) => v.toMap()).toList()),
-      'starting_chorus': startingChorus != null ? jsonEncode(startingChorus) : null,
+      'starting_chorus': startingChorus != null
+          ? jsonEncode(startingChorus)
+          : null,
       'chorus': chorus != null ? jsonEncode(chorus) : null,
       'ending_chorus': endingChorus != null ? jsonEncode(endingChorus) : null,
       'categories': categories.join(','),
@@ -96,8 +101,8 @@ class Song {
     final versesJson = map['verses'] as String?;
     final verses = versesJson != null
         ? (jsonDecode(versesJson) as List)
-            .map((v) => Verse.fromMap(v as Map<String, dynamic>))
-            .toList()
+              .map((v) => Verse.fromMap(v as Map<String, dynamic>))
+              .toList()
         : [];
 
     // Вспомогательная функция для парсинга припевов
@@ -114,6 +119,7 @@ class Song {
       id: map['id'] as int,
       title: map['title'] as String,
       number: map['number']?.toString(),
+      isSystem: (map['is_system'] as int?) == 1,
       verses: verses as List<Verse>,
       startingChorus: _parseChorus(map['starting_chorus']),
       chorus: _parseChorus(map['chorus']),

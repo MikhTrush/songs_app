@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:songs_app/l10n/app_localizations.dart';
 import 'package:songs_app/models/category.dart';
@@ -54,9 +53,14 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     setState(() => _isLoading = true);
-    final results = await SongDatabase.instance.searchOnlyText(query.toLowerCase());
+    final numberResults = RegExp(r'^\d+$').hasMatch(query)
+        ? await SongDatabase.instance.searchNumber(query)
+        : <Song>[]; // или пустой список нужного типа
+    final results = await SongDatabase.instance.searchTextAndTitle(
+      query.toLowerCase(),
+    );
     setState(() {
-      _searchResults = results;
+      _searchResults = [...numberResults, ...results];
       _isLoading = false;
       _currentQuery = query.toLowerCase(); // Store the current search query
     });
@@ -141,7 +145,8 @@ class _SearchPageState extends State<SearchPage> {
 
   // Helper function to find the first verse or chorus containing the search term
   String _findVerseWithMatch(Song song, String searchTerm) {
-    if (searchTerm.isEmpty) return song.verses.isNotEmpty ? song.verses[0].text : '';
+    if (searchTerm.isEmpty)
+      return song.verses.isNotEmpty ? song.verses[0].text : '';
 
     final lowerSearchTerm = searchTerm.toLowerCase();
 
@@ -180,7 +185,9 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     // Fallback to first verse if no match found
-    return song.verses.isNotEmpty ? _trimVerseToLines(song.verses[0].text, 3) : '';
+    return song.verses.isNotEmpty
+        ? _trimVerseToLines(song.verses[0].text, 3)
+        : '';
   }
 
   // Helper function to trim a verse to a specific number of lines
@@ -248,7 +255,7 @@ class _SearchPageState extends State<SearchPage> {
 
                 return ListTile(
                   title: _buildHighlightedText(
-                    song.title,
+                    '${song.number} ${song.title}',
                     _currentQuery,
                     isTitle: true,
                   ),
