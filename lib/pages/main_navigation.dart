@@ -72,7 +72,7 @@ class _MainNavigationState extends State<MainNavigation> {
             label: AppLocalizations.of(context)!.settings,
           ),
         ],
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
     );
   }
