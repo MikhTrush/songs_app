@@ -4,10 +4,8 @@ import 'package:songs_app/models/category.dart';
 import 'package:songs_app/widgets/search_field.dart';
 import 'package:songs_app/pages/song_detail_page.dart';
 import 'package:songs_app/widgets/song_search_item.dart';
-import 'package:songs_app/widgets/tag_chip.dart';
 import '../db/song_database.dart';
 import '../models/song.dart';
-// Import the collections page
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -43,7 +41,7 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() => _isLoading = true);
 
-    // TODO: Implement logic to exlude already shown songs
+    // TODO: Implement logic to exclude already shown songs
     final numberResults = RegExp(r'^\d+$').hasMatch(query)
         ? await SongDatabase.instance.searchNumber(query)
         : <Song>[]; // или пустой список нужного типа
@@ -152,7 +150,7 @@ class _SearchPageState extends State<SearchPage> {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          SearchField(context: context, controller: controller),
+          SearchField(controller: controller),
           if (_isLoading) LinearProgressIndicator(),
           Expanded(
             child: ListView.builder(
