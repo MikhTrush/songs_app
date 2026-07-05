@@ -327,4 +327,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ending_chorus => 'Ending chorus';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get lyrics => 'Lyrics';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get date_not_set => 'Date not set';
 }

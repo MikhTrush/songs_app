@@ -97,5 +97,10 @@
   "starting_chorus": "Starting chorus",
   "verse": "Verse",
   "chorus": "Chorus",
-  "ending_chorus": "Ending chorus"
+  "ending_chorus": "Ending chorus",
+  "filters": "Filters",
+  "lyrics": "Lyrics",
+  "reset": "Reset",
+  "accept": "Accept",
+  "date_not_set": "Date not set"
 }

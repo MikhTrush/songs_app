@@ -97,5 +97,10 @@
   "starting_chorus": "Первый припев",
   "verse": "Куплет",
   "chorus": "Припев",
-  "ending_chorus": "Последний припев"
+  "ending_chorus": "Последний припев",
+  "filters": "Фильтры",
+  "lyrics": "Слова",
+  "reset": "Сбросить",
+  "accept": "Принять",
+  "date_not_set": "Дата не установлена"
 }

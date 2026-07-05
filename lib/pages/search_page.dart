@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:songs_app/l10n/app_localizations.dart';
 import 'package:songs_app/models/category.dart';
@@ -5,7 +7,9 @@ import 'package:songs_app/widgets/search_field.dart';
 import 'package:songs_app/pages/song_detail_page.dart';
 import 'package:songs_app/widgets/song_search_item.dart';
 import '../db/song_database.dart';
+import '../models/filter_model.dart';
 import '../models/song.dart';
+import '../widgets/filter_bottom_sheet.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -20,6 +24,7 @@ class _SearchPageState extends State<SearchPage> {
   List<CategoryModel> categories = [];
   List<Song> _searchResults = [];
   bool _isLoading = false;
+  FilterModel _currentFilters = FilterModel();
 
   final controller = TextEditingController();
 
@@ -145,12 +150,48 @@ class _SearchPageState extends State<SearchPage> {
     return result;
   }
 
+  void _onTextChange() {
+    _onSearch(controller.text.toLowerCase());
+  }
+
+  Future<void> _openFilters() async {
+    final result = await showModalBottomSheet<FilterModel>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FilterBottomSheet(initialFilters: _currentFilters),
+    );
+
+    if (result != null) {
+      setState(() {
+        _currentFilters = result;
+      });
+      // Здесь можно вызвать обновление данных с новыми фильтрами
+      _applyFilters(result);
+    }
+  }
+
+  void _applyFilters(FilterModel filters) {
+    // print('Название: ${filters.name}');
+    // print('Автор: ${filters.author}');
+    // print('Дата от: ${filters.dateFrom}');
+    // print('Дата до: ${filters.dateTo}');
+  }
+
   Widget _searchSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          SearchField(controller: controller),
+          SearchField(
+            controller: controller,
+            filterWidget: IconButton(
+              icon: Icon(Icons.filter_list_outlined),
+              onPressed: () {
+                _openFilters();
+              },
+            ),
+          ),
           if (_isLoading) LinearProgressIndicator(),
           Expanded(
             child: ListView.builder(
@@ -200,9 +241,5 @@ class _SearchPageState extends State<SearchPage> {
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  void _onTextChange() {
-    _onSearch(controller.text.toLowerCase());
   }
 }

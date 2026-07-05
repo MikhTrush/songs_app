@@ -327,4 +327,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ending_chorus => 'Последний припев';
+
+  @override
+  String get filters => 'Фильтры';
+
+  @override
+  String get lyrics => 'Слова';
+
+  @override
+  String get reset => 'Сбросить';
+
+  @override
+  String get accept => 'Принять';
+
+  @override
+  String get date_not_set => 'Дата не установлена';
 }

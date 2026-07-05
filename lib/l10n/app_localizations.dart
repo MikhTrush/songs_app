@@ -694,6 +694,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ending chorus'**
   String get ending_chorus;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @lyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics'**
+  String get lyrics;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @date_not_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not set'**
+  String get date_not_set;
 }
 
 class _AppLocalizationsDelegate
